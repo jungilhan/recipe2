@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.StaggeredGridView;
@@ -38,16 +39,17 @@ public class HomeActivity extends SherlockActivity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		startActivity(new Intent(this, SplashActivity.class));
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.ac_home);
+		
 		setupViews();
 		requestRecipe();
 	}
 	
 	private void setupViews() {	
 		adapter = new ThumbnailAdapter(this, thumbnails);
-		
-		new ThumbnailAdapter(this, thumbnails);
 		sgvThumbnail = (StaggeredGridView)findViewById(R.id.sgv_thumbnail);
 		sgvThumbnail.setColumnCount(2);
 		sgvThumbnail.setAdapter(adapter);

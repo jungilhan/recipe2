@@ -4,6 +4,8 @@
     <string name="app_name">야간매점 레시피</string>
     <string name="episode_postfix">호</string>
     <string name="action_refresh">새로고침</string>
-    <string name="action_edit">댓글달기</string>    
+    <string name="action_edit">댓글달기</string>
+    <string name="ingredients">재료</string>
+    <string name="send">전송</string>    
 
 </resources>

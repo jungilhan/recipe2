@@ -1,23 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
 
-   <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:app="http://schemas.android.com/apk/res-auto"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:orientation="vertical" >
-       
-       <android.support.v4.view.ViewPager
-           android:id="@+id/pager"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent" />
-       
-       <com.viewpagerindicator.CirclePageIndicator
-			android:id="@+id/indicator"
-			android:padding="10dip"
-			android:layout_height="wrap_content"
-			android:layout_width="fill_parent"
-			app:fillColor="#ff8200"
-            app:pageColor="#fff"
-            app:strokeColor="#ddd" />
-        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+		<ListView
+		    android:id="@+id/lv_comments"
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent" />
+    </LinearLayout>
     
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:orientation="horizontal"
+        android:background="#fff" >
+        <ImageView
+            android:id="@+id/iv_like"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_comment_like" />
+        <EditText 
+            android:id="@+id/et_comment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="10dp"
+            android:hint="댓글 쓰기" />
+        <Button
+            android:id="@+id/bt_send"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginLeft="10dp"
+            android:textColor="#fff"
+            android:textSize="16sp"
+            android:text="@string/send"
+            android:background="@drawable/round_rect"/>
+    </LinearLayout>"
+</LinearLayout>

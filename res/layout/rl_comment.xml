@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp" >
+    
+    <ImageView
+        android:id="@+id/iv_profile"
+        android:layout_width="40dp"
+		android:layout_height="40dp"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentTop="true"
+		android:src="@drawable/ic_blank_profile" />
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/iv_profile"
+        android:layout_marginLeft="10dp"
+        android:textSize="16sp"
+        android:textColor="#41b1b5"
+        android:text="한정일" />
+    <TextView
+        android:id="@+id/tv_comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_name"
+        android:layout_alignLeft="@id/tv_name"
+        android:textSize="16sp"
+        android:textColor="#666"
+        android:text="완전 맛있을 것 같아요! :)" />
+
+</RelativeLayout>

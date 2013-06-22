@@ -71,8 +71,8 @@ public class ThumbnailAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public long getItemId(int position) {
-		return position;
+	public long getItemId(int id) {
+		return id;
 	}
 
 	@Override

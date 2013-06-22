@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+	<android.support.v4.view.ViewPager
+			android:id="@+id/pager"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent" />
+		    
+		<com.viewpagerindicator.CirclePageIndicator
+			android:id="@+id/indicator"
+			android:padding="10dip"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:background="#fff"
+			app:fillColor="#e44f37"
+			app:pageColor="#fff"
+			app:strokeColor="#ddd" />
+			
+		<View 
+		    android:layout_width="match_parent"
+		    android:layout_height="1px"
+		    android:background="#eee" />
+			
+		<RelativeLayout
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:padding="10dp"
+		    android:background="#fff">
+		    <ImageView
+		        android:id="@+id/iv_ingredients"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_alignParentLeft="true"
+		        android:layout_alignParentTop="true"
+		        android:src="@drawable/ic_ingredients" />
+		    <TextView
+		        android:id="@+id/tv_ingredients_title"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_toRightOf="@id/iv_ingredients"
+		        android:layout_marginLeft="10dp"
+		        android:textSize="18sp"
+		        android:textColor="#e44f37"
+		        android:text="@string/ingredients" />
+		    <TextView
+		        android:id="@+id/tv_ingredients"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_below="@id/tv_ingredients_title"
+		        android:layout_alignLeft="@id/tv_ingredients_title"
+		        android:layout_marginTop="6dp"
+		        android:textSize="16sp"
+		        android:textColor="#666"
+		        android:text="비빔라면, 골뱅이, 오이, 참기름, 통깨" />
+		</RelativeLayout>
+		
+</LinearLayout>
