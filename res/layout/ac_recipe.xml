@@ -19,7 +19,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:padding="10dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="6dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="6dp"
         android:orientation="horizontal"
         android:background="#fff" >
         <ImageView
@@ -34,14 +37,11 @@
             android:layout_weight="1"
             android:layout_marginLeft="10dp"
             android:hint="댓글 쓰기" />
-        <Button
-            android:id="@+id/bt_send"
+        <ImageView
+            android:id="@+id/iv_send"
             android:layout_width="wrap_content"
-            android:layout_height="34dp"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:textColor="#fff"
-            android:textSize="16sp"
-            android:text="@string/send"
-            android:background="@drawable/round_rect"/>
+            android:src="@drawable/btn_send"/>
     </LinearLayout>"
 </LinearLayout>

@@ -40,4 +40,9 @@ public class Tag implements Serializable {
 		String[] parts = Pattern.compile("|", Pattern.LITERAL).split(title); 
 		return parts[4];
 	}
+	
+	public String ingredients() {
+		String[] parts = Pattern.compile("|", Pattern.LITERAL).split(title);
+		return parts[5];
+	}
 }

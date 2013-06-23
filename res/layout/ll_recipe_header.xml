@@ -10,52 +10,100 @@
 			android:layout_width="match_parent"
 			android:layout_height="match_parent" />
 		    
-		<com.viewpagerindicator.CirclePageIndicator
-			android:id="@+id/indicator"
-			android:padding="10dip"
-			android:layout_height="wrap_content"
-			android:layout_width="fill_parent"
-			android:background="#fff"
-			app:fillColor="#e44f37"
-			app:pageColor="#fff"
-			app:strokeColor="#ddd" />
-			
-		<View 
-		    android:layout_width="match_parent"
-		    android:layout_height="1px"
-		    android:background="#eee" />
-			
-		<RelativeLayout
-		    android:layout_width="match_parent"
+	<com.viewpagerindicator.CirclePageIndicator
+		android:id="@+id/indicator"
+		android:padding="10dip"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:background="#fff"
+		app:fillColor="#e44f37"
+		app:pageColor="#fff"
+		app:strokeColor="#ddd" />
+		
+	<View 
+	    android:layout_width="match_parent"
+	    android:layout_height="1dp"
+	    android:background="#eee" />
+		
+	<RelativeLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:padding="10dp"
+	    android:background="#fff">
+	    <ImageView
+	        android:id="@+id/iv_ingredients"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentLeft="true"
+	        android:layout_alignParentTop="true"
+	        android:src="@drawable/ic_ingredients" />
+	    <TextView
+	        android:id="@+id/tv_ingredients_title"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_toRightOf="@id/iv_ingredients"
+	        android:layout_marginLeft="10dp"
+	        android:textSize="18sp"
+	        android:textColor="#e44f37"
+	        android:text="@string/ingredients" />
+	    <TextView
+	        android:id="@+id/tv_ingredients"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@id/tv_ingredients_title"
+	        android:layout_alignLeft="@id/tv_ingredients_title"
+	        android:textSize="16sp"
+	        android:textColor="#666" />
+	</RelativeLayout>
+	
+	<View 
+	    android:layout_width="match_parent"
+	    android:layout_height="1dp"
+	    android:background="#eee" />
+	
+	<RelativeLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:padding="10dp" >
+		<ImageView
+		    android:id="@+id/iv_youtube"
+		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:padding="10dp"
-		    android:background="#fff">
+		    android:layout_alignParentLeft="true"
+		    android:layout_centerVertical="true"
+		    android:src="@drawable/btn_youtube" />
+		<LinearLayout
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_alignParentRight="true"
+		    android:layout_centerVertical="true"
+		    android:layout_marginRight="10dp"
+		    android:gravity="center_vertical" >
 		    <ImageView
-		        android:id="@+id/iv_ingredients"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
-		        android:layout_alignParentLeft="true"
-		        android:layout_alignParentTop="true"
-		        android:src="@drawable/ic_ingredients" />
-		    <TextView
-		        android:id="@+id/tv_ingredients_title"
+		        android:src="@drawable/ic_like" />
+		    <TextView 
+		        android:id="@+id/tv_count_like"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
-		        android:layout_toRightOf="@id/iv_ingredients"
-		        android:layout_marginLeft="10dp"
-		        android:textSize="18sp"
-		        android:textColor="#e44f37"
-		        android:text="@string/ingredients" />
-		    <TextView
-		        android:id="@+id/tv_ingredients"
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content"
-		        android:layout_below="@id/tv_ingredients_title"
-		        android:layout_alignLeft="@id/tv_ingredients_title"
-		        android:layout_marginTop="6dp"
+		        android:layout_marginLeft="6dp"
 		        android:textSize="16sp"
 		        android:textColor="#666"
-		        android:text="비빔라면, 골뱅이, 오이, 참기름, 통깨" />
-		</RelativeLayout>
-		
+		        android:text="11"/>
+		    <ImageView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginLeft="10dp"
+		        android:src="@drawable/ic_comment" />
+		    <TextView 
+		        android:id="@+id/tv_count_comment"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginLeft="6dp"
+		        android:textSize="16sp"
+		        android:textColor="#666"
+		        android:text="32"/>
+		</LinearLayout>
+	</RelativeLayout>
 </LinearLayout>

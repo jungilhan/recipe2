@@ -6,6 +6,5 @@
     <string name="action_refresh">새로고침</string>
     <string name="action_edit">댓글달기</string>
     <string name="ingredients">재료</string>
-    <string name="send">전송</string>    
 
 </resources>

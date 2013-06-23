@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="4dp"
         android:textColor="#fff"
         android:textSize="24sp"        
         android:shadowColor="#000"
@@ -45,6 +45,7 @@
         android:layout_height="60dp"
         android:layout_below="@id/iv_thumbnail"
         android:padding="6dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         android:background="@drawable/rect_shadow">
         
@@ -78,5 +79,4 @@
                 android:textColor="#999" />
         </LinearLayout>
     </LinearLayout>
-    
 </RelativeLayout>

@@ -21,6 +21,16 @@
         android:textColor="#41b1b5"
         android:text="한정일" />
     <TextView
+        android:id="@+id/tv_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/tv_name"
+        android:layout_alignBottom="@id/tv_name"
+        android:layout_marginLeft="8dp"
+        android:textSize="12sp"
+        android:textColor="#666"
+        android:text="15분 전" />
+    <TextView
         android:id="@+id/tv_comment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
