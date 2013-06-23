@@ -45,7 +45,9 @@ public class HomeActivity extends SherlockActivity {
 		requestRecipe();
 	}
 	
-	private void setupViews() {	
+	private void setupViews() {
+		getSupportActionBar().setIcon(R.drawable.abs_icon);
+		
 		adapter = new ThumbnailAdapter(this, thumbnails);
 		sgvThumbnail = (StaggeredGridView)findViewById(R.id.sgv_thumbnail);
 		sgvThumbnail.setColumnCount(2);

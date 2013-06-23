@@ -1,5 +1,6 @@
 package com.bulgogi.recipe.model;
 
+import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.http.model.Post;
 
 public class Thumbnail {	
@@ -37,9 +38,9 @@ public class Thumbnail {
 		return post.tags.get(0).chef();
 	}
 	
-	public String getChefImageUrl() {
+	public String getChefImageUri() {
 		if (post.getChef() == null) {
-			return null;
+			return "drawable://" + R.drawable.ic_blank_profile;
 		}
 		
 		return post.getChef().url;

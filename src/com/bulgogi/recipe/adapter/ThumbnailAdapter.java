@@ -128,8 +128,7 @@ public class ThumbnailAdapter extends BaseAdapter {
 		});
 		
 		ImageView ivChef = (ImageView)convertView.findViewById(R.id.iv_chef);
-		String uri = thumbnail.getChefImageUrl() != null ? thumbnail.getChefImageUrl() : "drawable://" + R.drawable.ic_blank_profile;
-		imageLoader.displayImage(uri, ivChef, options, new SimpleImageLoadingListener() {
+		imageLoader.displayImage(thumbnail.getChefImageUri(), ivChef, options, new SimpleImageLoadingListener() {
 			@Override
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
