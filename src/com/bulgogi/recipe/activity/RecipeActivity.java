@@ -47,6 +47,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener 
 	
 	private void setupView(Post post) {		
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setDisplayShowHomeEnabled(false);
+		getSupportActionBar().setDisplayShowTitleEnabled(true);
 		getSupportActionBar().setTitle(post.title);
 		
 		LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);

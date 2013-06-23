@@ -10,7 +10,7 @@
     </style>
 
     <style name="LightActionBar" parent="Widget.Sherlock.ActionBar">
-        <item name="android:displayOptions"><!-- showHome| -->showTitle</item>
+        <item name="android:displayOptions">showHome<!--|showTitle--></item>
         <item name="android:background">@drawable/abs_background</item>
         <item name="android:titleTextStyle">@style/Theme.Recipe.ActionBar.TitleTextStyle</item>
     </style>

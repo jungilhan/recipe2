@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.StaggeredGridView;
@@ -39,8 +38,6 @@ public class HomeActivity extends SherlockActivity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		startActivity(new Intent(this, SplashActivity.class));
-		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.ac_home);
 		
