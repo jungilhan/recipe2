@@ -93,6 +93,14 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener 
 			ivYoutube.setVisibility(View.VISIBLE);
 		}
 		
+		ImageView ivLike = (ImageView)findViewById(R.id.iv_like);
+		ivLike.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(RecipeActivity.this, LoginActivity.class));
+			}
+		});
+		
 		adapter = new CommentAdapter(this, comments);
 		lvComments = (ListView)findViewById(R.id.lv_comments);
 		lvComments.addHeaderView(header);

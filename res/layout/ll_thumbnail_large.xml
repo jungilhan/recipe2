@@ -25,14 +25,17 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentTop="true"
-	        android:layout_marginLeft="8dp"
-	        android:layout_marginTop="4dp"
+	        android:layout_marginLeft="0dp"
+	        android:layout_marginTop="0dp"
+	        android:paddingLeft="6dp"
+        	android:paddingRight="6dp"
 	        android:textColor="#fff"
-	        android:textSize="24sp"        
+	        android:textSize="18sp"        
 	        android:shadowColor="#000"
-	        android:shadowDx="1"
-	        android:shadowDy="1"
-	        android:shadowRadius="1" />
+	        android:shadowDx="0"
+	        android:shadowDy="0"
+	        android:shadowRadius="0"
+	        android:background="@drawable/round_rect" />
 	        
 	    <TextView 
 	        android:id="@+id/tv_episode_postfix"
@@ -45,7 +48,8 @@
 	        android:shadowColor="#000"
 	        android:shadowDx="1"
 	        android:shadowDy="1"
-	        android:shadowRadius="1" />
+	        android:shadowRadius="1"
+	        android:visibility="gone" />
 	    	    
 	    <LinearLayout 
 	        android:layout_width="match_parent"

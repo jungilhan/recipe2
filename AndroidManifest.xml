@@ -37,6 +37,11 @@
             android:name=".activity.RecipeActivity"
             android:screenOrientation="portrait" >
         </activity>
+        <activity 
+            android:name=".activity.LoginActivity"
+            android:theme="@style/Theme.Sherlock.NoActionBar"
+            android:screenOrientation="portrait" >
+        </activity>
     </application>
 
 </manifest>
