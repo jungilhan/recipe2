@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <!-- <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_overflow"
+        android:orderInCategory="1"
+        android:showAsAction="always|withText"
+        android:title="@string/action_settings"/>
     <item
         android:id="@+id/action_refresh"
         android:icon="@drawable/ic_refresh"
-        android:orderInCategory="100"
+        android:orderInCategory="2"
         android:showAsAction="always|withText"
         android:title="@string/action_refresh"/>
+	-->
+	<item
+	    android:id="@+id/action_login"
+        android:icon="@drawable/ic_facebook"
+        android:orderInCategory="1"
+        android:showAsAction="always|withText"
+        android:title="@string/action_login"/>
 </menu>

@@ -8,7 +8,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.StaggeredGridView;
 import android.util.Log;
@@ -21,10 +27,13 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.adapter.ThumbnailAdapter;
+import com.bulgogi.recipe.auth.FacebookHelper;
 import com.bulgogi.recipe.http.WPRestApi;
 import com.bulgogi.recipe.http.model.Post;
 import com.bulgogi.recipe.http.model.Posts;
 import com.bulgogi.recipe.model.Thumbnail;
+import com.facebook.Session;
+import com.facebook.SessionState;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,15 +45,44 @@ public class HomeActivity extends SherlockActivity {
 	private StaggeredGridView sgvThumbnail;
 	private ThumbnailAdapter adapter;
 	
+	private FacebookHelper facebookHelper;
+	private FacebookSessionCallback facebookSessionCallback = new FacebookSessionCallback();
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.ac_home);
 		
+		facebookHelper = new FacebookHelper(this, savedInstanceState, facebookSessionCallback);
+		
 		setupViews();
 		requestRecipe();
 	}
 	
+    @Override
+    public void onStart() {
+        super.onStart();
+        facebookHelper.addSessionStatusCallback(facebookSessionCallback);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        facebookHelper.removeSessionStatusCallback(facebookSessionCallback);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        facebookHelper.onActivityResult(this, requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        facebookHelper.saveSession(outState);
+    }
+    
 	private void setupViews() {
 		getSupportActionBar().setIcon(R.drawable.abs_icon);
 		
@@ -161,10 +199,50 @@ public class HomeActivity extends SherlockActivity {
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.action_refresh:
-        	requestRecipe();
+        case R.id.action_login:
+        	if (!facebookHelper.isLogin()) {
+        		facebookHelper.login();
+        	} else {
+        		showLogoutDialog();
+        	}
         	break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void showLogoutDialog() {
+		View innerView = getLayoutInflater().inflate(R.layout.rl_logout, null);
+		AlertDialog.Builder builder;
+		
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
+			builder = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT);
+		} else {
+			builder = new AlertDialog.Builder(this);
+		}
+		
+		builder.setView(innerView);
+		builder.setPositiveButton("확인", new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				facebookHelper.logout();
+			}
+		});
+		
+		builder.setNegativeButton("취소", new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				
+			}
+		});
+		
+		builder.show();
+	}
+	
+    private class FacebookSessionCallback implements Session.StatusCallback {
+        @Override
+        public void call(Session session, SessionState state, Exception exception) {
+            
+        }
     }
 }
