@@ -13,6 +13,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.http.model.Image;
@@ -41,10 +42,19 @@ public class RecipePagerAdapter extends PagerAdapter {
 	public Object instantiateItem(View pager, int position) {
 		LinearLayout layout = (LinearLayout)inflater.inflate(R.layout.ll_recipe_pager_item, null);
 		ImageView ivRecipe = (ImageView)layout.findViewById(R.id.iv_recipe);
-		ImageLoader imageLoader = ImageLoader.getInstance();
+		final ProgressBar pbLoading = (ProgressBar)layout.findViewById(R.id.pb_loading);
+		
+		ImageLoader imageLoader = ImageLoader.getInstance();		
 		imageLoader.displayImage(images.get(position).url, ivRecipe, options, new SimpleImageLoadingListener() {
 			@Override
+			public void onLoadingStarted(String imageUri, View view) {
+				pbLoading.setVisibility(View.VISIBLE);
+			}
+			
+			@Override
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+				pbLoading.setVisibility(View.GONE);
+				
 				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
 				view.setAnimation(animation);
 				animation.start();

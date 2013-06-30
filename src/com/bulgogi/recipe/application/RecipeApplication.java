@@ -1,7 +1,9 @@
 package com.bulgogi.recipe.application;
 
 import android.app.Application;
+import android.preference.PreferenceManager;
 
+import com.bulgogi.recipe.utils.PreferenceHelper;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
@@ -12,8 +14,9 @@ public class RecipeApplication extends Application {
 		
 		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext())
 		.memoryCacheSize((int)(Runtime.getRuntime().maxMemory() / 8))
-		.build();
-		
+		.build();		
 		ImageLoader.getInstance().init(config);
+		
+		PreferenceHelper.getInstance().init(PreferenceManager.getDefaultSharedPreferences(this));
 	}
 }

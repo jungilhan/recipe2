@@ -1,21 +1,40 @@
 package com.bulgogi.recipe.activity;
 
+import java.io.IOException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.Options;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
@@ -23,38 +42,54 @@ import com.actionbarsherlock.view.MenuItem;
 import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.adapter.CommentAdapter;
 import com.bulgogi.recipe.adapter.RecipePagerAdapter;
+import com.bulgogi.recipe.auth.FacebookHelper;
 import com.bulgogi.recipe.config.Constants.Extra;
+import com.bulgogi.recipe.http.HttpApi;
+import com.bulgogi.recipe.http.model.Comment;
 import com.bulgogi.recipe.http.model.Post;
-import com.bulgogi.recipe.model.Comment;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viewpagerindicator.CirclePageIndicator;
 
-public class RecipeActivity extends SherlockActivity implements OnClickListener {
+public class RecipeActivity extends SherlockActivity implements OnClickListener, Session.StatusCallback {
+	private static final String TAG = RecipeActivity.class.getSimpleName();
+
+	private PullToRefreshAttacher pullToRefreshAttacher;
 	private ListView lvComments;
 	private CommentAdapter adapter;
-	private ArrayList<Comment> comments = new ArrayList<Comment>();
-	private LinearLayout header;
-	
+	private ArrayList<Comment> commentList = new ArrayList<Comment>();
+	private LinearLayout llHeader;	
+	private FacebookHelper facebookHelper;
+	private InputMethodManager inputMethodManager;
+	 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.ac_recipe);
 		
-		Intent intent = getIntent();
-		Post post = (Post)intent.getSerializableExtra(Extra.POST);
+		facebookHelper = new FacebookHelper(this, savedInstanceState, this);
+		inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 		
+		Intent intent = getIntent();
+		Post post = (Post)intent.getSerializableExtra(Extra.POST);		
 		setupView(post);
+		requestComments(Integer.toString(post.id));
 	}
-	
-	private void setupView(Post post) {		
+
+	private void setupView(final Post post) {		
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowHomeEnabled(false);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
 		getSupportActionBar().setTitle(post.title);
 		
 		LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		header = (LinearLayout)inflater.inflate(R.layout.ll_recipe_header, null);
+		llHeader = (LinearLayout)inflater.inflate(R.layout.ll_recipe_header, null);
 		
-		final ViewPager pager = (ViewPager)header.findViewById(R.id.pager);
+		final ViewPager pager = (ViewPager)llHeader.findViewById(R.id.pager);
 		pager.setAdapter(new RecipePagerAdapter(this, post.getRecipes()));
 		pager.setOnTouchListener(new View.OnTouchListener() {
 			@Override
@@ -77,13 +112,18 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener 
 			}
 	    });
 	    
-		CirclePageIndicator indicator = (CirclePageIndicator)header.findViewById(R.id.indicator);
+		CirclePageIndicator indicator = (CirclePageIndicator)llHeader.findViewById(R.id.indicator);
 		indicator.setViewPager(pager);
 		
-		TextView tvIngredients = (TextView)header.findViewById(R.id.tv_ingredients);
+		TextView tvIngredients = (TextView)llHeader.findViewById(R.id.tv_ingredients);
 		tvIngredients.setText(post.tags.get(0).ingredients());
 
-		ImageView ivYoutube = (ImageView)header.findViewById(R.id.iv_youtube);
+		String directions = post.content.replaceAll("\\<.*?\\>", "");
+		TextView tvDirections = (TextView)llHeader.findViewById(R.id.tv_directions);
+		directions = directions.substring(directions.indexOf("1."), directions.length());
+		tvDirections.setText(directions);
+		
+		ImageView ivYoutube = (ImageView)llHeader.findViewById(R.id.iv_youtube);
 		ivYoutube.setOnClickListener(this);
 		String youtubeId = post.tags.get(0).youtubeId();
 		ivYoutube.setTag(youtubeId);
@@ -92,29 +132,103 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener 
 		} else {
 			ivYoutube.setVisibility(View.VISIBLE);
 		}
+
+		final EditText etComment = (EditText)findViewById(R.id.et_comment);
 		
 		ImageView ivLike = (ImageView)findViewById(R.id.iv_like);
 		ivLike.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(RecipeActivity.this, LoginActivity.class));
+				
 			}
 		});
 		
-		adapter = new CommentAdapter(this, comments);
+		ImageView ivSend = (ImageView)findViewById(R.id.iv_send);
+		ivSend.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (!facebookHelper.isLogin()) {
+					showLoginDialog();
+				} else {
+					if (etComment.getText().length() > 0) {
+						final String postId = Integer.toString(post.id);
+						final String id = facebookHelper.getId();
+						final String name = facebookHelper.getName();
+						final String thumbnail = "http://graph.facebook.com/" + id + "/picture?type=small";
+						final String comment = etComment.getText().toString();
+
+						if (id == null || (id != null && id.equals(""))) {
+							Toast.makeText(RecipeActivity.this, "로그인 정보를 불러오는데 실패했습니다. 잠시 후에 다시 댓글을 전송해보세요.", Toast.LENGTH_LONG).show();
+							return;
+						}
+						
+						new Thread(new Runnable() {
+							@Override
+							public void run() {
+								HttpApi httpApi = new HttpApi();
+								List<NameValuePair> params = new ArrayList<NameValuePair>();
+								params.add(new BasicNameValuePair("post_id", postId));
+								params.add(new BasicNameValuePair("fb_id", id));
+								params.add(new BasicNameValuePair("user_name", name));
+								params.add(new BasicNameValuePair("thumb_url", thumbnail));
+								params.add(new BasicNameValuePair("comment", comment));
+								httpApi.post("http://14.63.219.181:3000/comment/write", params);
+								
+								requestComments(postId);
+							}
+						}).start();
+						
+						etComment.setText("");
+						inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);						
+					}
+				}
+			}
+		});
+		
+		adapter = new CommentAdapter(this, commentList);
 		lvComments = (ListView)findViewById(R.id.lv_comments);
-		lvComments.addHeaderView(header);
+		lvComments.addHeaderView(llHeader);		
 		lvComments.setAdapter(adapter);
 		
-		comments.add(new Comment("drawable://" + R.drawable.ic_blank_profile, "한정일", "우왕 굳! :D"));
-		comments.add(new Comment("drawable://" + R.drawable.ic_blank_profile, "오진성", "완전 맛있어요. 많이 먹고 살쩌버려라! ㅋㅋㅋㅋ"));
-		comments.add(new Comment("drawable://" + R.drawable.ic_blank_profile, "유인영", "헐, 완전 MSG 범벅이네! 먹지마셈~"));
-		comments.add(new Comment("drawable://" + R.drawable.ic_blank_profile, "정우람", "우어어어어"));
-		comments.add(new Comment("drawable://" + R.drawable.ic_blank_profile, "박준희", "추천 +1"));
-		
-		adapter.notifyDataSetChanged();
+		Options options = new Options();
+		options.refreshScrollDistance = 0.4f;		
+		pullToRefreshAttacher = new PullToRefreshAttacher(this, options);
+		pullToRefreshAttacher.setRefreshableView(lvComments, new PullToRefreshAttacher.OnRefreshListener() {
+			@Override
+			public void onRefreshStarted(View view) {
+				requestComments(Integer.toString(post.id));
+			}
+		});
+	}
+
+	private void requestComments(String postId) {
+		new CommentsLoader().execute("http://14.63.219.181:3000/comment/load/" + postId);
 	}
 	
+    @Override
+    public void onStart() {
+        super.onStart();
+        facebookHelper.addSessionStatusCallback(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        facebookHelper.removeSessionStatusCallback(this);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        facebookHelper.onActivityResult(this, requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        facebookHelper.saveSession(outState);
+    }
+    
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 //		getSupportMenuInflater().inflate(R.menu.recipe, menu);
@@ -127,8 +241,6 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener 
 		case android.R.id.home:
 			finish();
 			return true;
-//		case R.id.action_edit:
-//			break;
 		}
 		
 		return super.onOptionsItemSelected(item);
@@ -139,9 +251,116 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener 
 		switch (v.getId()) {
 		case R.id.iv_youtube:
 			StringBuilder sb = new StringBuilder("vnd.youtube:"); 
-			sb.append(v.getTag()); 
+			sb.append(v.getTag());
 			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sb.toString())));
 			break;
 		}
 	}
+	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void showLoginDialog() {
+		AlertDialog.Builder builder;		
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
+			builder = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT);
+		} else {
+			builder = new AlertDialog.Builder(this);
+		}
+		
+		builder.setMessage(R.string.login_guide);
+		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+	        	if (!facebookHelper.isLogin()) {
+	        		facebookHelper.login();
+	        	} 
+			}
+		});
+		
+		builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {}
+		});
+		
+		builder.show();
+	}
+
+	@Override
+	public void call(Session session, SessionState state, Exception exception) {
+		if (session != null && session.isOpened()) {
+    		facebookHelper.makeMeRequest(session);
+    	}		
+	}
+	
+	private class CommentsLoader extends AsyncTask {				
+		private TextView tvCountComment = (TextView)llHeader.findViewById(R.id.tv_count_comment);
+		private LinearLayout llEmpty = (LinearLayout)llHeader.findViewById(R.id.ll_empty_coments);
+		private LinearLayout llLoadingMsg = (LinearLayout)llHeader.findViewById(R.id.ll_loading_msg);
+		private TextView tvLoadingMsg = (TextView)llLoadingMsg.getChildAt(1);				
+		
+		@Override
+		protected Object doInBackground(Object... params) {
+			ObjectMapper mapper = new ObjectMapper();
+			ArrayList<Comment> comments = null;
+			
+			try {
+				comments = mapper.readValue(new URL((String)params[0]), new TypeReference<List<Comment>>(){});
+			} catch (JsonGenerationException e) {
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				e.printStackTrace();				
+			} catch (UnknownHostException e) { 				
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+						
+			return comments;
+		}
+		
+		@Override
+		protected void onPostExecute(Object result) {
+			pullToRefreshAttacher.setRefreshComplete();
+			
+			if (result == null) {
+				llLoadingMsg.setVisibility(View.VISIBLE);
+				tvLoadingMsg.setText(R.string.loading_error);
+				return;
+			} else {
+				llLoadingMsg.setVisibility(View.GONE);
+				tvLoadingMsg.setText(R.string.loading_comments);
+			}
+			
+			ArrayList<Comment> comments = (ArrayList<Comment>)result;
+			Log.d(TAG, comments.toString());
+								
+			int length = comments.size(); 
+			if (length == 0) {
+				llEmpty.setVisibility(View.VISIBLE);
+			} else {
+				llEmpty.setVisibility(View.GONE);
+			}
+			
+			for (int i = 0; i < length; i++) {
+				Comment comment = (Comment)comments.get(i);
+				if (!contains(comment)) {
+					commentList.add(comment);
+				}
+			}
+
+			tvCountComment.setText(Integer.toString(length));
+			adapter.notifyDataSetChanged();
+		}
+		
+		private boolean contains(Comment comment) {
+			Iterator<Comment> iter = commentList.iterator();
+			while (iter.hasNext()) {
+				if (((Comment)iter.next()).commentId == comment.commentId) {
+					return true;
+				}
+			}			
+			return false;
+		}
+	}
 }
+
+

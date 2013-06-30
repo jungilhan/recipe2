@@ -19,7 +19,7 @@
         android:layout_marginLeft="10dp"
         android:textSize="16sp"
         android:textColor="#41b1b5"
-        android:text="한정일" />
+        android:text="" />
     <TextView
         android:id="@+id/tv_timestamp"
         android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
         android:layout_marginLeft="8dp"
         android:textSize="12sp"
         android:textColor="#666"
-        android:text="15분 전" />
+        android:text="" />
     <TextView
         android:id="@+id/tv_comment"
         android:layout_width="wrap_content"
@@ -38,6 +38,6 @@
         android:layout_alignLeft="@id/tv_name"
         android:textSize="16sp"
         android:textColor="#666"
-        android:text="완전 맛있을 것 같아요! :)" />
+        android:text="" />
 
 </RelativeLayout>

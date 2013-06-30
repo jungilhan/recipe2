@@ -5,10 +5,17 @@
     <string name="episode_postfix">호</string>
     <string name="action_settings">설정</string>
     <string name="action_refresh">새로고침</string>
-    <string name="action_login">페이스북 로그인</string>
+    <string name="action_login">로그인</string>
+    <string name="action_logout">로그아웃</string>
     <string name="action_edit">댓글달기</string>
     <string name="ingredients">재료</string>
-    <string name="login_guide">페이스북 계정으로 댓글을 달아보세요 :)</string>
+    <string name="directions">요리법</string>    
+    <string name="login_guide">댓글은 로그인 사용자만 작성할 수 있습니다. 페이스북 계정으로 로그인 하시겠습니까?</string>
+    <string name="ok">확인</string>
+    <string name="cancel">취소</string>
+    <string name="empty_comments">첫 댓글을 남겨보세요! :D</string>
+    <string name="loading_comments">댓글을 불러오는 중입니다...</string>
+    <string name="loading_error">데이터를 불러오지 못했습니다.\n잠시 후 다시 시도 하세요.</string>
     <string name="applicationId">503802709675152</string>
 
 </resources>

@@ -106,11 +106,8 @@ public class ThumbnailAdapter extends BaseAdapter {
 		});
 		
 		TextView tvEpisode = (TextView)convertView.findViewById(R.id.tv_episode);
-		tvEpisode.setText(thumbnail.getEpisode());
+		tvEpisode.setText(thumbnail.getEpisode() + context.getResources().getString(R.string.episode_postfix));
 
-		TextView tvEpisodePostfix = (TextView)convertView.findViewById(R.id.tv_episode_postfix);
-		tvEpisodePostfix.setText(context.getResources().getString(R.string.episode_postfix));
-		
 		ImageView ivThumbnail = (ImageView)convertView.findViewById(R.id.iv_thumbnail);
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ivThumbnail.getLayoutParams());
 		lp.width = imageBounds.right - imageBounds.left;

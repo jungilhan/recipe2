@@ -4,14 +4,20 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.bulgogi.recipe.config.Constants;
+import com.bulgogi.recipe.utils.PreferenceHelper;
 import com.facebook.LoggingBehavior;
+import com.facebook.Request;
+import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.Settings;
+import com.facebook.model.GraphUser;
 
 public class FacebookHelper {
 	private Activity activity;
-	Session.StatusCallback statusCallback;
+	private Session.StatusCallback statusCallback;
+	private GraphUser user; 
 	
 	public FacebookHelper(Activity activity, Bundle savedInstanceState, Session.StatusCallback statusCallback) {
 		this.activity = activity;
@@ -48,6 +54,9 @@ public class FacebookHelper {
 		Session session = Session.getActiveSession();
         if (!session.isClosed()) {
             session.closeAndClearTokenInformation();
+            
+            PreferenceHelper.getInstance().putString(Constants.PREF_NAME, null);
+			PreferenceHelper.getInstance().putString(Constants.PREF_FACEBOOK_ID, null);
         }
 	}
 	
@@ -71,5 +80,45 @@ public class FacebookHelper {
 	
 	public void removeSessionStatusCallback(Session.StatusCallback statusCallback) {
 		Session.getActiveSession().removeCallback(statusCallback);
+	}
+
+	public String getId() {
+		if (user != null) {
+			return user.getId();
+		} else if (PreferenceHelper.getInstance().contains(Constants.PREF_FACEBOOK_ID)) {
+			return PreferenceHelper.getInstance().getString(Constants.PREF_FACEBOOK_ID, new String());
+		}
+		return null;
+	}
+	
+	public String getName() {
+		if (user != null) {
+			return user.getName();
+		} else if (PreferenceHelper.getInstance().contains(Constants.PREF_NAME)) {
+			return PreferenceHelper.getInstance().getString(Constants.PREF_NAME, new String());
+		}
+		return null;
+	}
+	
+	public void makeMeRequest(final Session session) {
+		Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
+			@Override
+			public void onCompleted(GraphUser graphUser, Response response) {
+				if (session == Session.getActiveSession()) {
+					if (graphUser != null) {
+						user = graphUser;
+						
+						PreferenceHelper.getInstance().putString(Constants.PREF_NAME, user.getName());
+						PreferenceHelper.getInstance().putString(Constants.PREF_FACEBOOK_ID, user.getId());
+					}
+				}
+				
+				if (response.getError() != null) {
+					
+				}
+			}
+		});
+		 
+		 request.executeAsync();
 	}
 }

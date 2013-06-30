@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ScrollViewDelegate;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -34,41 +36,60 @@ import com.bulgogi.recipe.http.model.Posts;
 import com.bulgogi.recipe.model.Thumbnail;
 import com.facebook.Session;
 import com.facebook.SessionState;
+import com.facebook.widget.ProfilePictureView;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class HomeActivity extends SherlockActivity {
+public class HomeActivity extends SherlockActivity implements Session.StatusCallback {
 	private static final String TAG = HomeActivity.class.getSimpleName();
 	
 	private ArrayList<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
 	private StaggeredGridView sgvThumbnail;
 	private ThumbnailAdapter adapter;
-	
+	private PullToRefreshAttacher pullToRefreshAttacher;	
 	private FacebookHelper facebookHelper;
-	private FacebookSessionCallback facebookSessionCallback = new FacebookSessionCallback();
+	private MenuItem actionbarLogin;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.ac_home);
 		
-		facebookHelper = new FacebookHelper(this, savedInstanceState, facebookSessionCallback);
+		facebookHelper = new FacebookHelper(this, savedInstanceState, this);
 		
 		setupViews();
 		requestRecipe();
+	}
+    
+	private void setupViews() {
+		getSupportActionBar().setIcon(R.drawable.abs_icon);
+		
+		adapter = new ThumbnailAdapter(this, thumbnails);
+		sgvThumbnail = (StaggeredGridView)findViewById(R.id.sgv_thumbnail);
+		sgvThumbnail.setColumnCount(2);
+		sgvThumbnail.setAdapter(adapter);
+	
+		pullToRefreshAttacher = new PullToRefreshAttacher(this);
+		pullToRefreshAttacher.setRefreshableView(sgvThumbnail, (PullToRefreshAttacher.ViewDelegate)new ScrollViewDelegate(), 
+				new PullToRefreshAttacher.OnRefreshListener() {
+			@Override
+			public void onRefreshStarted(View view) {
+				requestRecipe();		
+			}
+		});
 	}
 	
     @Override
     public void onStart() {
         super.onStart();
-        facebookHelper.addSessionStatusCallback(facebookSessionCallback);
+        facebookHelper.addSessionStatusCallback(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        facebookHelper.removeSessionStatusCallback(facebookSessionCallback);
+        facebookHelper.removeSessionStatusCallback(this);
     }
 
     @Override
@@ -83,23 +104,13 @@ public class HomeActivity extends SherlockActivity {
         facebookHelper.saveSession(outState);
     }
     
-	private void setupViews() {
-		getSupportActionBar().setIcon(R.drawable.abs_icon);
-		
-		adapter = new ThumbnailAdapter(this, thumbnails);
-		sgvThumbnail = (StaggeredGridView)findViewById(R.id.sgv_thumbnail);
-		sgvThumbnail.setColumnCount(2);
-		sgvThumbnail.setAdapter(adapter);
-		
-	}
-	
 	private void requestRecipe() {
     	new RecipeLoader().execute(WPRestApi.getPostsUrl(50, false));
     }
 	
 	private class RecipeLoader extends AsyncTask {
 		TextView tvError;
-		ProgressBar pbLoading; 		
+		ProgressBar pbLoading;
 	
 		RecipeLoader() {
 			tvError = (TextView)findViewById(R.id.tv_error);
@@ -107,12 +118,12 @@ public class HomeActivity extends SherlockActivity {
 		}
 		
 		@Override
-		protected Object doInBackground(Object... param) {
+		protected Object doInBackground(Object... params) {
 			ObjectMapper mapper = new ObjectMapper();
 			Posts posts = null;
 			
 			try {
-				posts = mapper.readValue(new URL((String)param[0]), Posts.class);
+				posts = mapper.readValue(new URL((String)params[0]), Posts.class);
 			} catch (JsonGenerationException e) {
 				e.printStackTrace();
 			} catch (JsonMappingException e) {
@@ -134,7 +145,8 @@ public class HomeActivity extends SherlockActivity {
 		
 		@Override
 		protected void onPostExecute(Object result) {			
-			pbLoading.setVisibility(View.GONE);			
+			pbLoading.setVisibility(View.GONE);		
+			pullToRefreshAttacher.setRefreshComplete();
 			
 			if (result == null) {
 				tvError.setVisibility(View.VISIBLE);
@@ -150,7 +162,7 @@ public class HomeActivity extends SherlockActivity {
 			for (int i = 0; i < posts.posts.size(); i++) {
 				Post post = posts.posts.get(i);
 				Thumbnail thumbnail = new Thumbnail(post);
-				if (contain(post)) {
+				if (contains(post)) {
 					remove(post);					
 				}
 				
@@ -179,7 +191,7 @@ public class HomeActivity extends SherlockActivity {
 			}			
 		}
 		
-		private boolean contain(Post post) {
+		private boolean contains(Post post) {
 			Iterator<Thumbnail> iter = thumbnails.iterator();
 			while (iter.hasNext()) {
 				if (((Thumbnail)iter.next()).getId() == post.id) {
@@ -193,12 +205,20 @@ public class HomeActivity extends SherlockActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.home, menu);
+		actionbarLogin = menu.findItem(R.id.action_login);
 		return true;		
 	}
 	
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+        case R.id.action_settings:
+        	if (facebookHelper.isLogin()) {
+        		actionbarLogin.setTitle(R.string.action_logout);	
+			} else {
+				actionbarLogin.setTitle(R.string.action_login);
+			}
+        	break;
         case R.id.action_login:
         	if (!facebookHelper.isLogin()) {
         		facebookHelper.login();
@@ -213,36 +233,38 @@ public class HomeActivity extends SherlockActivity {
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void showLogoutDialog() {
 		View innerView = getLayoutInflater().inflate(R.layout.rl_logout, null);
-		AlertDialog.Builder builder;
 		
-		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
-			builder = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT);
-		} else {
-			builder = new AlertDialog.Builder(this);
+		if (facebookHelper.getId() != null) {
+			ProfilePictureView ppvProfile = (ProfilePictureView)innerView.findViewById(R.id.ppv_profile);
+			ppvProfile.setProfileId(facebookHelper.getId());
 		}
 		
+		if (facebookHelper.getName() != null) {
+			TextView tvName = (TextView)innerView.findViewById(R.id.tv_name);
+			tvName.setText(facebookHelper.getName());
+		}
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);		
 		builder.setView(innerView);
-		builder.setPositiveButton("확인", new OnClickListener() {
+		builder.setPositiveButton(R.string.ok, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
 				facebookHelper.logout();
 			}
 		});
 		
-		builder.setNegativeButton("취소", new OnClickListener() {
+		builder.setNegativeButton(R.string.cancel, new OnClickListener() {
 			@Override
-			public void onClick(DialogInterface arg0, int arg1) {
-				
-			}
+			public void onClick(DialogInterface arg0, int arg1) {}
 		});
 		
 		builder.show();
 	}
-	
-    private class FacebookSessionCallback implements Session.StatusCallback {
-        @Override
-        public void call(Session session, SessionState state, Exception exception) {
-            
-        }
-    }
+
+	@Override
+	public void call(Session session, SessionState state, Exception exception) {
+		if (session != null && session.isOpened()) {
+    		facebookHelper.makeMeRequest(session);
+		}
+	}	
 }

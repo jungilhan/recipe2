@@ -1,47 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
+    
+    <ListView
+        android:id="@+id/lv_comments"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/ll_comment_container" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical" >
-		<ListView
-		    android:id="@+id/lv_comments"
-		    android:layout_width="match_parent"
-		    android:layout_height="match_parent" />
-    </LinearLayout>
-    
-    <LinearLayout
+        android:id="@+id/ll_comment_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#fff"
         android:gravity="center_vertical"
-        android:paddingLeft="10dp"
-        android:paddingTop="6dp"
-        android:paddingRight="10dp"
-        android:paddingBottom="6dp"
         android:orientation="horizontal"
-        android:background="#fff" >
+        android:paddingBottom="6dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="6dp" >
+
         <ImageView
             android:id="@+id/iv_like"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_comment_like" />
-        <EditText 
+
+        <EditText
             android:id="@+id/et_comment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginLeft="10dp"
+            android:layout_weight="1"
             android:hint="댓글 쓰기" />
+
         <ImageView
             android:id="@+id/iv_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:src="@drawable/btn_send"/>
-    </LinearLayout>"
-</LinearLayout>
+            android:src="@drawable/btn_send" />
+    </LinearLayout>
+</RelativeLayout>

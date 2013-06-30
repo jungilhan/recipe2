@@ -1,12 +1,13 @@
 package com.bulgogi.recipe.config;
 
 public class Constants {
-	private Constants() {
-		
-	}
+	private Constants() {}
+	
+	public static final String PREF_NAME = "name";
+	public static final String PREF_FACEBOOK_ID = "facebook_id";	
 	
 	public static class Config {
-		
+
 	}
 	
 	public static class Extra {
