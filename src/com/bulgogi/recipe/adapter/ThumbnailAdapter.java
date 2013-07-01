@@ -94,7 +94,7 @@ public class ThumbnailAdapter extends BaseAdapter {
 		
 		Thumbnail thumbnail = thumbnails.get(position);
 		
-		View container = convertView.findViewById(R.id.container);
+		final View container = convertView.findViewById(R.id.container);
 		container.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -115,9 +115,17 @@ public class ThumbnailAdapter extends BaseAdapter {
         lp.height = imageBounds.bottom - imageBounds.top;
         ivThumbnail.setLayoutParams(lp);
 
+        final View pbLoading = container.findViewById(R.id.pb_loading);
 		imageLoader.displayImage(thumbnail.getUrl(), ivThumbnail, options, new SimpleImageLoadingListener() {
 			@Override
+			public void onLoadingStarted(String imageUri, View view) {				
+				pbLoading.setVisibility(View.VISIBLE);
+			}
+			
+			@Override
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+				pbLoading.setVisibility(View.GONE);
+				
 				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
 				view.setAnimation(animation);
 				animation.start();
