@@ -121,7 +121,9 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		indicator.setViewPager(pager);
 		
 		TextView tvIngredients = (TextView)llHeader.findViewById(R.id.tv_ingredients);
-		tvIngredients.setText(post.tags.get(0).ingredients());
+		String ingredients = post.tags.get(0).ingredients();
+		ingredients = ingredients.replaceAll("\\$", ", ");
+		tvIngredients.setText(ingredients);
 
 		String contents = post.content.replaceAll("\\<.*?\\>", "");
 		TextView tvDirections = (TextView)llHeader.findViewById(R.id.tv_directions);
@@ -233,6 +235,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			@Override
 			public void onRefreshStarted(View view) {
 				requestComments(post.id);
+				requestLike(post.id);
 			}
 		});
 	}
