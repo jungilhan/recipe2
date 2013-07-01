@@ -7,40 +7,52 @@
         android:id="@+id/lv_comments"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/ll_comment_container" />
+        android:layout_above="@+id/ll_comment_container_wrapper" />
 
     <LinearLayout
-        android:id="@+id/ll_comment_container"
+        android:id="@+id/ll_comment_container_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="#fff"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingBottom="6dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="6dp" >
-
-        <ImageView
-            android:id="@+id/iv_like"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_comment_like" />
-
-        <EditText
-            android:id="@+id/et_comment"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_weight="1"
-            android:hint="댓글 쓰기" />
-
-        <ImageView
-            android:id="@+id/iv_send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:src="@drawable/btn_send" />
+        android:orientation="vertical">
+        
+        <View 
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#e44f37" />
+        
+	    <LinearLayout
+	        android:id="@+id/ll_comment_container"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:gravity="center_vertical"
+	        android:orientation="horizontal"
+	        android:paddingBottom="6dp"
+	        android:paddingLeft="10dp"
+	        android:paddingRight="10dp"
+	        android:paddingTop="6dp" >
+	    
+	        <ImageView
+	            android:id="@+id/iv_like"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:src="@drawable/ic_comment_like" />
+	
+	        <EditText
+	            android:id="@+id/et_comment"
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_marginLeft="10dp"
+	            android:layout_weight="1"
+	            android:hint="댓글 쓰기" />
+	
+	        <ImageView
+	            android:id="@+id/iv_send"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_marginLeft="10dp"
+	            android:src="@drawable/btn_send" />
+	    </LinearLayout>
     </LinearLayout>
 </RelativeLayout>
