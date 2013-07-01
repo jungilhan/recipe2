@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -118,10 +119,18 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		TextView tvIngredients = (TextView)llHeader.findViewById(R.id.tv_ingredients);
 		tvIngredients.setText(post.tags.get(0).ingredients());
 
-		String directions = post.content.replaceAll("\\<.*?\\>", "");
+		String contents = post.content.replaceAll("\\<.*?\\>", "");
 		TextView tvDirections = (TextView)llHeader.findViewById(R.id.tv_directions);
-		directions = directions.substring(directions.indexOf("1."), directions.length());
-		tvDirections.setText(directions);
+		contents = contents.substring(contents.indexOf("1."), contents.length());
+		String[] directions = contents.split("[1-9]\\.\\s");
+		String direction = new String();
+		for (int i = 1; i < directions.length; i++) {
+			direction += "<span><b>" + i +". " + "</b>" + directions[i].trim() + "</span>";
+			if (i != directions.length - 1) {
+				direction += "<br/><br/>";
+			}
+		}
+		tvDirections.setText(Html.fromHtml(direction));
 		
 		ImageView ivYoutube = (ImageView)llHeader.findViewById(R.id.iv_youtube);
 		ivYoutube.setOnClickListener(this);

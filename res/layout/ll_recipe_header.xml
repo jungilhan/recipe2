@@ -43,16 +43,19 @@
 	        android:layout_height="wrap_content"
 	        android:layout_toRightOf="@id/iv_ingredients"
 	        android:layout_marginLeft="10dp"
-	        android:textSize="18sp"
+	        android:textSize="16sp"
 	        android:textColor="#e44f37"
+	        android:textStyle="bold"
 	        android:text="@string/ingredients" />
 	    <TextView
 	        android:id="@+id/tv_ingredients"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
-	        android:layout_below="@id/tv_ingredients_title"
-	        android:layout_alignLeft="@id/tv_ingredients_title"
-	        android:textSize="16sp"
+	        android:layout_below="@id/iv_ingredients"
+	        android:layout_alignLeft="@id/iv_ingredients"
+	        android:layout_marginTop="5dp"
+            android:layout_marginLeft="10dp"
+	        android:textSize="15sp"
 	        android:textColor="#666" />
 	</RelativeLayout>
 	
@@ -79,16 +82,19 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/iv_directions"
             android:layout_marginLeft="10dp"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textColor="#e44f37"
+            android:textStyle="bold"
             android:text="@string/directions" />
         <TextView
             android:id="@+id/tv_directions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tv_directions_title"
-            android:layout_alignLeft="@id/tv_directions_title"
-            android:textSize="16sp"
+            android:layout_below="@id/iv_directions"
+            android:layout_alignLeft="@id/iv_directions"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="10dp"
+            android:textSize="15sp"
             android:textColor="#666" />
     </RelativeLayout>
     
@@ -124,7 +130,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:textColor="#666"
                 android:text="0"/>
             <ImageView
@@ -137,7 +143,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:textColor="#666"
                 android:text="0"/>
         </LinearLayout>
@@ -157,7 +163,8 @@
 		<TextView
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
-	        android:padding="10dp"        
+	        android:paddingTop="20dp"
+	        android:paddingBottom="20dp"
 	        android:gravity="center_horizontal"
 	        android:text="@string/empty_comments"
 	        android:textColor="#666"
