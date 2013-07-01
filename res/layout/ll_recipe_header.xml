@@ -53,7 +53,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_below="@id/iv_ingredients"
 	        android:layout_alignLeft="@id/iv_ingredients"
-	        android:layout_marginTop="5dp"
+	        android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
 	        android:textSize="15sp"
 	        android:textColor="#666" />
@@ -92,8 +92,9 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/iv_directions"
             android:layout_alignLeft="@id/iv_directions"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
+            android:paddingBottom="10dp"
             android:textSize="15sp"
             android:textColor="#666" />
     </RelativeLayout>
@@ -163,12 +164,12 @@
 		<TextView
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
-	        android:paddingTop="20dp"
-	        android:paddingBottom="20dp"
+	        android:paddingTop="15dp"
+	        android:paddingBottom="15dp"	        
 	        android:gravity="center_horizontal"
 	        android:text="@string/empty_comments"
 	        android:textColor="#666"
-	        android:textSize="16sp" />
+	        android:textSize="15sp" />
 	</LinearLayout>
 	
     <LinearLayout
@@ -185,11 +186,12 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"        
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"        
             android:gravity="center_horizontal"
             android:text="@string/loading_comments"
             android:textColor="#666"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
     </LinearLayout>
 
 </LinearLayout>
