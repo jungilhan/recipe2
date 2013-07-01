@@ -47,6 +47,7 @@ import com.bulgogi.recipe.auth.FacebookHelper;
 import com.bulgogi.recipe.config.Constants.Extra;
 import com.bulgogi.recipe.http.HttpApi;
 import com.bulgogi.recipe.http.model.Comment;
+import com.bulgogi.recipe.http.model.Like;
 import com.bulgogi.recipe.http.model.Post;
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -63,6 +64,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	private ListView lvComments;
 	private CommentAdapter adapter;
 	private ArrayList<Comment> commentList = new ArrayList<Comment>();
+	private ArrayList<Like> likeList = new ArrayList<Like>();
 	private LinearLayout llHeader;	
 	private FacebookHelper facebookHelper;
 	private InputMethodManager inputMethodManager;
@@ -78,7 +80,9 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		Intent intent = getIntent();
 		Post post = (Post)intent.getSerializableExtra(Extra.POST);		
 		setupView(post);
-		requestComments(Integer.toString(post.id));
+		
+		requestComments(post.id);
+		requestLike(post.id);
 	}
 
 	private void setupView(final Post post) {		
@@ -148,7 +152,30 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		ivLike.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				
+				if (!facebookHelper.isLogin()) {
+					showLoginDialog();
+				} else {
+					final int postId = post.id;
+					final String id = facebookHelper.getId();
+					
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							HttpApi httpApi = new HttpApi();
+							List<NameValuePair> params = new ArrayList<NameValuePair>();
+							params.add(new BasicNameValuePair("post_id", Integer.toString(post.id)));
+							params.add(new BasicNameValuePair("fb_id", id));
+							
+							if (isAlreadyLike(Integer.parseInt(id))) {
+								httpApi.post("http://14.63.219.181:3000/unlike", params);	
+							} else {
+								httpApi.post("http://14.63.219.181:3000/like", params);
+							}
+							
+							requestLike(postId);
+						}
+					}).start();
+				}
 			}
 		});
 		
@@ -160,7 +187,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 					showLoginDialog();
 				} else {
 					if (etComment.getText().length() > 0) {
-						final String postId = Integer.toString(post.id);
+						final int postId = post.id;
 						final String id = facebookHelper.getId();
 						final String name = facebookHelper.getName();
 						final String thumbnail = "http://graph.facebook.com/" + id + "/picture?type=small";
@@ -176,7 +203,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 							public void run() {
 								HttpApi httpApi = new HttpApi();
 								List<NameValuePair> params = new ArrayList<NameValuePair>();
-								params.add(new BasicNameValuePair("post_id", postId));
+								params.add(new BasicNameValuePair("post_id", Integer.toString(postId)));
 								params.add(new BasicNameValuePair("fb_id", id));
 								params.add(new BasicNameValuePair("user_name", name));
 								params.add(new BasicNameValuePair("thumb_url", thumbnail));
@@ -205,13 +232,27 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		pullToRefreshAttacher.setRefreshableView(lvComments, new PullToRefreshAttacher.OnRefreshListener() {
 			@Override
 			public void onRefreshStarted(View view) {
-				requestComments(Integer.toString(post.id));
+				requestComments(post.id);
 			}
 		});
 	}
 
-	private void requestComments(String postId) {
+	private void requestComments(int postId) {
 		new CommentsLoader().execute("http://14.63.219.181:3000/comment/load/" + postId);
+	}
+	
+	private void requestLike(int postId) {
+		new LikeLoader().execute("http://14.63.219.181:3000/like/" + postId);
+	}
+	
+	private boolean isAlreadyLike(int facebookId) {
+		Iterator<Like> iter = likeList.iterator();
+		while (iter.hasNext()) {
+			if (((Like)iter.next()).facebookId == facebookId) {
+				return true;
+			}
+		}			
+		return false;
 	}
 	
     @Override
@@ -370,6 +411,37 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			return false;
 		}
 	}
+	
+	private class LikeLoader extends AsyncTask {				
+		private TextView tvLike = (TextView)llHeader.findViewById(R.id.tv_count_like); 
+		
+		@Override
+		protected Object doInBackground(Object... params) {
+			ObjectMapper mapper = new ObjectMapper();
+			ArrayList<Like> likes = null;
+			
+			try {
+				likes = mapper.readValue(new URL((String)params[0]), new TypeReference<List<Like>>(){});
+			} catch (JsonGenerationException e) {
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				e.printStackTrace();				
+			} catch (UnknownHostException e) { 				
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+						
+			return likes;
+		}
+		
+		@Override
+		protected void onPostExecute(Object result) {
+			ArrayList<Like> likes = (ArrayList<Like>)result;
+			Log.d(TAG, likes.toString());
+			
+			likeList = likes;
+			tvLike.setText(Integer.toString(likeList.size()));
+		}		
+	}
 }
-
-
