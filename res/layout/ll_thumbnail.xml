@@ -41,6 +41,12 @@
 	        android:textSize="16sp"
 	        android:background="#e44f37" />    
 	    
+		<View
+	    	android:layout_width="match_parent"
+	    	android:layout_height="1px"
+	    	android:layout_below="@id/iv_thumbnail"
+	    	android:background="#ddd" />
+	
 	    <LinearLayout 
 	        android:layout_width="match_parent"
 	        android:layout_height="60dp"

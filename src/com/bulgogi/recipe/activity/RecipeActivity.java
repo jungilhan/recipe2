@@ -68,6 +68,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	private LinearLayout llHeader;	
 	private FacebookHelper facebookHelper;
 	private InputMethodManager inputMethodManager;
+	private ImageView ivLike;
 	 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -150,7 +151,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 
 		final EditText etComment = (EditText)findViewById(R.id.et_comment);
 		
-		ImageView ivLike = (ImageView)findViewById(R.id.iv_like);
+		ivLike = (ImageView)findViewById(R.id.iv_like);
 		ivLike.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -445,6 +446,14 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			
 			likeList = likes;
 			tvLike.setText(Integer.toString(likeList.size()));
+			
+			if (likeList.size() > 0 && facebookHelper.getId() != null) {
+				if (isAlreadyLike(Integer.parseInt(facebookHelper.getId()))) {
+					ivLike.setImageResource(R.drawable.ic_comment_unlike);
+				}
+			} else {
+				ivLike.setImageResource(R.drawable.ic_comment_like);
+			}
 		}		
 	}
 }
