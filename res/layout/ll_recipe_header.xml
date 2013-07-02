@@ -21,6 +21,58 @@
 		app:strokeColor="#ddd" />
 
 	<View 
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ddd" />
+        
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="#fff" >
+        <ImageView
+            android:id="@+id/iv_youtube"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/btn_youtube" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:gravity="center_vertical" >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_like" />
+            <TextView 
+                android:id="@+id/tv_count_like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="6dp"
+                android:textSize="15sp"
+                android:textColor="#666"
+                android:text="0"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:src="@drawable/ic_comment" />
+            <TextView 
+                android:id="@+id/tv_count_comment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="6dp"
+                android:textSize="15sp"
+                android:textColor="#666"
+                android:text="0"/>
+        </LinearLayout>
+    </RelativeLayout>
+    
+	<View 
 	    android:layout_width="match_parent"
 	    android:layout_height="1dp"
 	    android:background="#ddd" />
@@ -97,58 +149,7 @@
             android:paddingBottom="10dp"
             android:textSize="15sp"
             android:textColor="#666" />
-    </RelativeLayout>
-    
-    <View 
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#ddd" />
-        
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp" >
-        <ImageView
-            android:id="@+id/iv_youtube"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/btn_youtube" />
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
-            android:gravity="center_vertical" >
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_like" />
-            <TextView 
-                android:id="@+id/tv_count_like"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="6dp"
-                android:textSize="15sp"
-                android:textColor="#666"
-                android:text="0"/>
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:src="@drawable/ic_comment" />
-            <TextView 
-                android:id="@+id/tv_count_comment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="6dp"
-                android:textSize="15sp"
-                android:textColor="#666"
-                android:text="0"/>
-        </LinearLayout>
-    </RelativeLayout>
+    </RelativeLayout>  
     
 	<LinearLayout
 	    android:id="@+id/ll_empty_coments"
