@@ -5,7 +5,7 @@
     <string name="episode_postfix">호</string>
     <string name="action_settings">설정</string>
     <string name="action_refresh">새로고침</string>
-    <string name="action_login">로그인</string>
+    <string name="action_login">페이스북 로그인</string>
     <string name="action_logout">로그아웃</string>
     <string name="action_edit">댓글달기</string>
     <string name="ingredients">재료</string>
