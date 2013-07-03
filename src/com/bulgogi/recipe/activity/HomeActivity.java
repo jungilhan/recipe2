@@ -18,7 +18,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.ProgressBar;
@@ -30,6 +29,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.adapter.ThumbnailAdapter;
 import com.bulgogi.recipe.auth.FacebookHelper;
+import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.http.WPRestApi;
 import com.bulgogi.recipe.http.model.Post;
 import com.bulgogi.recipe.http.model.Posts;
@@ -59,7 +59,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		facebookHelper = new FacebookHelper(this, savedInstanceState, this);		
 	    
 		setupViews();
-		requestRecipe();
+		requestRecipe(Constants.QUERY_COUNT, true);
 	}
     
 	private void setupViews() {
@@ -75,7 +75,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				new PullToRefreshAttacher.OnRefreshListener() {
 			@Override
 			public void onRefreshStarted(View view) {
-				requestRecipe();		
+				requestRecipe(Constants.QUERY_COUNT, false);		
 			}
 		});
 	}
@@ -104,13 +104,13 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
         facebookHelper.saveSession(outState);
     }
     
-	private void requestRecipe() {
-    	new RecipeLoader().execute(WPRestApi.getPostsUrl(50, false));
+	private void requestRecipe(int count, boolean showProgressBar) {
+    	new RecipeLoader().execute(WPRestApi.getPostsUrl(count, false), showProgressBar);
     }
 	
 	private class RecipeLoader extends AsyncTask {
-		TextView tvError = (TextView)findViewById(R.id.tv_error);
-		ProgressBar pbLoading = (ProgressBar)findViewById(R.id.pb_loading);
+		private TextView tvError = (TextView)findViewById(R.id.tv_error);
+		private ProgressBar pbLoading = (ProgressBar)findViewById(R.id.pb_loading);
 		
 		@Override
 		protected Object doInBackground(Object... params) {
@@ -137,12 +137,10 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			super.onPreExecute();
 			
 			tvError.setVisibility(View.GONE);
-			pbLoading.setVisibility(View.VISIBLE);			
 		}
 		
 		@Override
-		protected void onPostExecute(Object result) {			
-			pbLoading.setVisibility(View.GONE);		
+		protected void onPostExecute(Object result) {
 			pullToRefreshAttacher.setRefreshComplete();
 			
 			if (result == null) {
@@ -152,9 +150,13 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				tvError.setVisibility(View.GONE);
 				gvThumbnail.setVisibility(View.VISIBLE);	
 			}
+			
+			if (pbLoading.getVisibility() == View.VISIBLE) {
+				pbLoading.setVisibility(View.GONE);	
+			}
 
 			Posts posts = (Posts)result;
-			Log.d(TAG, posts.toString());
+			//Log.d(TAG, posts.toString());
 			
 			for (int i = 0; i < posts.posts.size(); i++) {
 				Post post = posts.posts.get(i);
