@@ -12,7 +12,7 @@ public class Like {
 	public int postId;
 	
 	@JsonProperty("fb_id")
-	public int facebookId;
+	public long facebookId;
 		
 	@Override
 	public String toString() {

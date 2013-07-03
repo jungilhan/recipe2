@@ -169,7 +169,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 							params.add(new BasicNameValuePair("post_id", Integer.toString(post.id)));
 							params.add(new BasicNameValuePair("fb_id", id));
 							
-							if (isAlreadyLike(Integer.parseInt(id))) {
+							if (isAlreadyLike(Long.parseLong(id))) {
 								httpApi.post("http://14.63.219.181:3000/unlike", params);	
 							} else {
 								httpApi.post("http://14.63.219.181:3000/like", params);
@@ -249,7 +249,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		new LikeLoader().execute("http://14.63.219.181:3000/like/" + postId);
 	}
 	
-	private boolean isAlreadyLike(int facebookId) {
+	private boolean isAlreadyLike(long facebookId) {
 		Iterator<Like> iter = likeList.iterator();
 		while (iter.hasNext()) {
 			if (((Like)iter.next()).facebookId == facebookId) {
@@ -422,7 +422,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		@Override
 		protected Object doInBackground(Object... params) {
 			ObjectMapper mapper = new ObjectMapper();
-			ArrayList<Like> likes = null;
+			ArrayList<Like> likes = new ArrayList<Like>();
 			
 			try {
 				likes = mapper.readValue(new URL((String)params[0]), new TypeReference<List<Like>>(){});
@@ -442,13 +442,12 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		@Override
 		protected void onPostExecute(Object result) {
 			ArrayList<Like> likes = (ArrayList<Like>)result;
-			Log.d(TAG, likes.toString());
 			
 			likeList = likes;
 			tvLike.setText(Integer.toString(likeList.size()));
 			
 			if (likeList.size() > 0 && facebookHelper.getId() != null) {
-				if (isAlreadyLike(Integer.parseInt(facebookHelper.getId()))) {
+				if (isAlreadyLike(Long.parseLong(facebookHelper.getId()))) {
 					ivLike.setImageResource(R.drawable.ic_comment_unlike);
 				}
 			} else {
