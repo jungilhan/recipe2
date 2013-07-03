@@ -152,7 +152,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		final EditText etComment = (EditText)findViewById(R.id.et_comment);
 		
 		ivLike = (ImageView)findViewById(R.id.iv_like);
-		ivLike.setOnClickListener(new OnClickListener() {
+		View ivLikeWrapper = findViewById(R.id.ll_like_wrapper);
+		ivLikeWrapper.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (!facebookHelper.isLogin()) {

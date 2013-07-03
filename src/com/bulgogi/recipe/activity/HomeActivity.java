@@ -109,13 +109,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
     }
 	
 	private class RecipeLoader extends AsyncTask {
-		TextView tvError;
-		ProgressBar pbLoading;
-	
-		RecipeLoader() {
-			tvError = (TextView)findViewById(R.id.tv_error);
-			pbLoading = (ProgressBar)findViewById(R.id.pb_loading);			
-		}
+		TextView tvError = (TextView)findViewById(R.id.tv_error);
+		ProgressBar pbLoading = (ProgressBar)findViewById(R.id.pb_loading);
 		
 		@Override
 		protected Object doInBackground(Object... params) {
