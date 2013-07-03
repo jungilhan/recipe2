@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.activity.RecipeActivity;
+import com.bulgogi.recipe.application.RecipeApplication;
+import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.config.Constants.Extra;
 import com.bulgogi.recipe.model.Thumbnail;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -54,7 +56,9 @@ public class ThumbnailAdapter extends BaseAdapter {
 		.resetViewBeforeLoading()
 		.build();
 		
-		int imageWidth = (context.getResources().getDisplayMetrics().widthPixels / 2) 
+		
+		int columns = RecipeApplication.isTablet() == true ? Constants.GRIDVIEW_TABLET_COLUMNS : Constants.GRIDVIEW_DEFAULT_COLUMNS;
+		int imageWidth = (context.getResources().getDisplayMetrics().widthPixels / columns) 
 				- context.getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin)
 				- context.getResources().getDimensionPixelSize(R.dimen.sgv_item_padding);
 		int imageHeight = imageWidth;

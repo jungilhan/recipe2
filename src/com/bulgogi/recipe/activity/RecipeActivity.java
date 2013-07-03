@@ -412,10 +412,10 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		protected void onPostExecute(Object result) {
 			if (android.os.Build.VERSION.SDK_INT >= 14) {
 				pullToRefreshAttacher.setRefreshComplete();
-			} else {
-				isLoading = false;
-				findViewById(R.id.pb_main_loading).setVisibility(View.GONE);
 			}
+				
+			isLoading = false;
+			findViewById(R.id.pb_main_loading).setVisibility(View.GONE);
 			
 			if (result == null) {
 				llLoadingMsg.setVisibility(View.VISIBLE);

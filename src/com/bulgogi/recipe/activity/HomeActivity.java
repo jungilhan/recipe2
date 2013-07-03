@@ -29,6 +29,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.adapter.ThumbnailAdapter;
+import com.bulgogi.recipe.application.RecipeApplication;
 import com.bulgogi.recipe.auth.FacebookHelper;
 import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.http.WPRestApi;
@@ -70,9 +71,10 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		
 		adapter = new ThumbnailAdapter(this, thumbnails);
 		gvThumbnail = (GridView)findViewById(R.id.sgv_thumbnail);
-		gvThumbnail.setNumColumns(2);
+		
+		int columns = RecipeApplication.isTablet() == true ? Constants.GRIDVIEW_TABLET_COLUMNS : Constants.GRIDVIEW_DEFAULT_COLUMNS;
+		gvThumbnail.setNumColumns(columns);
 		gvThumbnail.setAdapter(adapter);
-	
 		
 		pullToRefreshAttacher = new PullToRefreshAttacher(this);
 		if (android.os.Build.VERSION.SDK_INT >= 14) {
@@ -165,9 +167,9 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		protected void onPostExecute(Object result) {
 			if (android.os.Build.VERSION.SDK_INT >= 14) {
 				pullToRefreshAttacher.setRefreshComplete();
-			} else {
-				isLoading = false;
 			}
+			
+			isLoading = false;
 			
 			if (result == null) {
 				tvError.setVisibility(View.VISIBLE);
