@@ -69,8 +69,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	private LinearLayout llHeader;	
 	private FacebookHelper facebookHelper;
 	private InputMethodManager inputMethodManager;
-	private ImageView ivLike;
-	private ProgressBar pbLike;
+	private LinearLayout ivLikeWrapper;	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -92,10 +91,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowHomeEnabled(false);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
-		getSupportActionBar().setTitle(post.title);
-		
-		pbLike = (ProgressBar)findViewById(R.id.pb_like);
-		pbLike.setVisibility(View.GONE);
+		getSupportActionBar().setTitle(post.title);			
 		
 		LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		llHeader = (LinearLayout)inflater.inflate(R.layout.ll_recipe_header, null);
@@ -156,14 +152,15 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 
 		final EditText etComment = (EditText)findViewById(R.id.et_comment);
 		
-		ivLike = (ImageView)findViewById(R.id.iv_like);
-		View ivLikeWrapper = findViewById(R.id.ll_like_wrapper);
+		ivLikeWrapper = (LinearLayout)findViewById(R.id.ll_like_wrapper);
 		ivLikeWrapper.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (!facebookHelper.isLogin()) {
 					showLoginDialog();
 				} else {
+					ivLikeWrapper.setVisibility(View.GONE);
+					
 					final int postId = post.id;
 					final String id = facebookHelper.getId();
 					
@@ -423,8 +420,9 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	}
 	
 	private class LikeLoader extends AsyncTask {				
-		private TextView tvLike = (TextView)llHeader.findViewById(R.id.tv_count_like); 
-		private Boolean showToast;
+		private TextView tvLike = (TextView)llHeader.findViewById(R.id.tv_count_like);
+		private ProgressBar pbLike = (ProgressBar)findViewById(R.id.pb_like);
+		private Boolean showToast = false;
 		
 		@Override
 		protected Object doInBackground(Object... params) {
@@ -455,19 +453,19 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 				@Override
 				public void run() {
 					pbLike.setVisibility(View.VISIBLE);
-					ivLike.setVisibility(View.GONE);
 				}
 			});			
 		}
 		
 		@Override
 		protected void onPostExecute(Object result) {
+			ivLikeWrapper.setVisibility(View.VISIBLE);
 			pbLike.setVisibility(View.GONE);
-			ivLike.setVisibility(View.VISIBLE);
 			
 			likeList = (ArrayList<Like>)result;
 			tvLike.setText(Integer.toString(likeList.size()));
 			
+			ImageView ivLike = ((ImageView)ivLikeWrapper.getChildAt(0));
 			if (likeList.size() > 0 && facebookHelper.getId() != null) {
 				if (isAlreadyLike(Long.parseLong(facebookHelper.getId()))) {
 					if (showToast) {
