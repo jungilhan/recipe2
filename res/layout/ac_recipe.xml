@@ -21,7 +21,7 @@
         <View 
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#e44f37" />
+            android:background="#ddd" />
         
 	    <LinearLayout
 	        android:id="@+id/ll_comment_container"
