@@ -24,10 +24,10 @@ import android.content.pm.Signature;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.widget.StaggeredGridView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -52,7 +52,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	private static final String TAG = HomeActivity.class.getSimpleName();
 	
 	private ArrayList<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
-	private StaggeredGridView sgvThumbnail;
+	private GridView gvThumbnail;
 	private ThumbnailAdapter adapter;
 	private PullToRefreshAttacher pullToRefreshAttacher;	
 	private FacebookHelper facebookHelper;
@@ -89,12 +89,12 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		getSupportActionBar().setIcon(R.drawable.abs_icon);
 		
 		adapter = new ThumbnailAdapter(this, thumbnails);
-		sgvThumbnail = (StaggeredGridView)findViewById(R.id.sgv_thumbnail);
-		sgvThumbnail.setColumnCount(2);
-		sgvThumbnail.setAdapter(adapter);
+		gvThumbnail = (GridView)findViewById(R.id.sgv_thumbnail);
+		gvThumbnail.setNumColumns(2);
+		gvThumbnail.setAdapter(adapter);
 	
 		pullToRefreshAttacher = new PullToRefreshAttacher(this);
-		pullToRefreshAttacher.setRefreshableView(sgvThumbnail, (PullToRefreshAttacher.ViewDelegate)new ScrollViewDelegate(), 
+		pullToRefreshAttacher.setRefreshableView(gvThumbnail, (PullToRefreshAttacher.ViewDelegate)new ScrollViewDelegate(), 
 				new PullToRefreshAttacher.OnRefreshListener() {
 			@Override
 			public void onRefreshStarted(View view) {
@@ -132,13 +132,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
     }
 	
 	private class RecipeLoader extends AsyncTask {
-		TextView tvError;
-		ProgressBar pbLoading;
-	
-		RecipeLoader() {
-			tvError = (TextView)findViewById(R.id.tv_error);
-			pbLoading = (ProgressBar)findViewById(R.id.pb_loading);			
-		}
+		TextView tvError = (TextView)findViewById(R.id.tv_error);
+		ProgressBar pbLoading = (ProgressBar)findViewById(R.id.pb_loading);
 		
 		@Override
 		protected Object doInBackground(Object... params) {
@@ -176,7 +171,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				return;
 			} else {
 				tvError.setVisibility(View.GONE);
-				sgvThumbnail.setVisibility(View.VISIBLE);	
+				gvThumbnail.setVisibility(View.VISIBLE);	
 			}
 
 			Posts posts = (Posts)result;

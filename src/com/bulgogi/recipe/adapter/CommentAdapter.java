@@ -78,7 +78,6 @@ public class CommentAdapter extends BaseAdapter {
 			holder.tvName = (TextView)convertView.findViewById(R.id.tv_name);
 			holder.tvComment = (TextView)convertView.findViewById(R.id.tv_comment);
 			holder.tvTimestamp = (TextView)convertView.findViewById(R.id.tv_timestamp);
-			
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder)convertView.getTag();

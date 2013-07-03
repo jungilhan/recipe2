@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.support.v4.widget.StaggeredGridView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,8 +35,13 @@ public class ThumbnailAdapter extends BaseAdapter {
 	private Rect imageBounds = new Rect();
 	
 	static class ViewHolder {
-		TextView tvChef;
+		View container;
 		ImageView ivThumbnail;
+		TextView tvEpisode;
+		TextView tvChef;
+		ImageView ivChef;
+		TextView tvFood;		
+		View pbLoading;
 	}
 	
 	public ThumbnailAdapter(Context context, ArrayList<Thumbnail> thumbnails) {
@@ -77,25 +81,27 @@ public class ThumbnailAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
-		switch (position) {
-		case 0:
-			convertView = inflator.inflate(R.layout.ll_thumbnail_large, parent, false);
-			StaggeredGridView.LayoutParams lp = new StaggeredGridView.LayoutParams(convertView.getLayoutParams());
-			lp.span = 2;
-			convertView.setLayoutParams(lp);
-			break;
-		default:
-			convertView = inflator.inflate(R.layout.ll_thumbnail, parent, false);
-			lp = new StaggeredGridView.LayoutParams(convertView.getLayoutParams());
-			lp.span = 1;
-			convertView.setLayoutParams(lp);
-			break;
-		}
-		
+		final ViewHolder holder;
 		Thumbnail thumbnail = thumbnails.get(position);
 		
-		final View container = convertView.findViewById(R.id.container);
-		container.setOnClickListener(new OnClickListener() {
+		if (convertView == null) {
+			LayoutInflater inflator = LayoutInflater.from(context);
+			convertView = inflator.inflate(R.layout.ll_thumbnail, null);
+			
+			holder = new ViewHolder();
+			holder.container = convertView.findViewById(R.id.container);
+			holder.pbLoading = convertView.findViewById(R.id.pb_loading);
+			holder.ivThumbnail = (ImageView)convertView.findViewById(R.id.iv_thumbnail);
+			holder.tvEpisode = (TextView)convertView.findViewById(R.id.tv_episode);
+			holder.tvChef = (TextView)convertView.findViewById(R.id.tv_chef);			
+			holder.ivChef = (ImageView)convertView.findViewById(R.id.iv_chef);
+			holder.tvFood = (TextView)convertView.findViewById(R.id.tv_food);			
+			convertView.setTag(holder);
+		} else {
+			holder = (ViewHolder)convertView.getTag();
+		}
+		
+		holder.container.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(context, RecipeActivity.class);
@@ -105,26 +111,21 @@ public class ThumbnailAdapter extends BaseAdapter {
 			}
 		});
 		
-		TextView tvEpisode = (TextView)convertView.findViewById(R.id.tv_episode);
-		tvEpisode.setText(thumbnail.getEpisode() + context.getResources().getString(R.string.episode_postfix));
-
-		ImageView ivThumbnail = (ImageView)convertView.findViewById(R.id.iv_thumbnail);
-		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ivThumbnail.getLayoutParams());
+		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(holder.ivThumbnail.getLayoutParams());
 		lp.width = imageBounds.right - imageBounds.left;
         lp.width -= position == 0 ? context.getResources().getDimensionPixelSize(R.dimen.sgv_item_padding) : 0;
         lp.height = imageBounds.bottom - imageBounds.top;
-        ivThumbnail.setLayoutParams(lp);
-
-        final View pbLoading = container.findViewById(R.id.pb_loading);
-		imageLoader.displayImage(thumbnail.getUrl(), ivThumbnail, options, new SimpleImageLoadingListener() {
+        holder.ivThumbnail.setLayoutParams(lp);
+        
+		imageLoader.displayImage(thumbnail.getUrl(), holder.ivThumbnail, options, new SimpleImageLoadingListener() {
 			@Override
 			public void onLoadingStarted(String imageUri, View view) {				
-				pbLoading.setVisibility(View.VISIBLE);
+				holder.pbLoading.setVisibility(View.VISIBLE);
 			}
 			
 			@Override
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-				pbLoading.setVisibility(View.GONE);
+				holder.pbLoading.setVisibility(View.GONE);
 				
 				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
 				view.setAnimation(animation);
@@ -132,22 +133,20 @@ public class ThumbnailAdapter extends BaseAdapter {
 			}
 		});
 		
-		ImageView ivChef = (ImageView)convertView.findViewById(R.id.iv_chef);
-		imageLoader.displayImage(thumbnail.getChefImageUri(), ivChef, options, new SimpleImageLoadingListener() {
+		imageLoader.displayImage(thumbnail.getChefImageUri(), holder.ivChef, options, new SimpleImageLoadingListener() {
 			@Override
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
 				view.setAnimation(animation);
 				animation.start();
 			}
-		});
-		
-		TextView tvFood = (TextView)convertView.findViewById(R.id.tv_food);
-		tvFood.setText(thumbnail.getFood());
-		
-		TextView tvChef = (TextView)convertView.findViewById(R.id.tv_chef);
-		tvChef.setText(thumbnail.getChef());
+		});		
+
+		holder.tvEpisode.setText(thumbnail.getEpisode() + context.getResources().getString(R.string.episode_postfix));
+		holder.tvFood.setText(thumbnail.getFood());		
+		holder.tvChef.setText(thumbnail.getChef());
 		
 		return convertView;
 	}	
 }
+
