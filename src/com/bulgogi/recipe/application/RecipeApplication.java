@@ -1,6 +1,7 @@
 package com.bulgogi.recipe.application;
 
 import android.app.Application;
+import android.content.pm.ActivityInfo;
 import android.preference.PreferenceManager;
 
 import com.bulgogi.recipe.utils.PreferenceHelper;
@@ -11,7 +12,7 @@ public class RecipeApplication extends Application {
 	@Override
     public void onCreate() {
 		super.onCreate();
-		
+
 		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext())
 		.memoryCacheSize((int)(Runtime.getRuntime().maxMemory() / 8))
 		.build();		

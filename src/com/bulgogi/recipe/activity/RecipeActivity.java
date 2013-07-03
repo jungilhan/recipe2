@@ -17,6 +17,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -45,6 +46,7 @@ import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.adapter.CommentAdapter;
 import com.bulgogi.recipe.adapter.RecipePagerAdapter;
 import com.bulgogi.recipe.auth.FacebookHelper;
+import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.config.Constants.Extra;
 import com.bulgogi.recipe.http.HttpApi;
 import com.bulgogi.recipe.http.model.Comment;
@@ -69,7 +71,9 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	private LinearLayout llHeader;	
 	private FacebookHelper facebookHelper;
 	private InputMethodManager inputMethodManager;
-	private LinearLayout ivLikeWrapper;	
+	private LinearLayout ivLikeWrapper;
+	private boolean isLoading = false;
+	private int postId;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +87,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		Post post = (Post)intent.getSerializableExtra(Extra.POST);		
 		setupView(post);
 		
+		postId = post.id;
 		requestComments(post.id);
 		requestLike(post.id, false);
 	}
@@ -91,7 +96,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowHomeEnabled(false);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
-		getSupportActionBar().setTitle(post.title);			
+		getSupportActionBar().setTitle(post.title);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		
 		LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		llHeader = (LinearLayout)inflater.inflate(R.layout.ll_recipe_header, null);
@@ -235,16 +241,24 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		Options options = new Options();
 		options.refreshScrollDistance = 0.4f;		
 		pullToRefreshAttacher = new PullToRefreshAttacher(this, options);
-		pullToRefreshAttacher.setRefreshableView(lvComments, new PullToRefreshAttacher.OnRefreshListener() {
-			@Override
-			public void onRefreshStarted(View view) {
-				requestComments(post.id);
-				requestLike(post.id, false);
-			}
-		});
+		if (android.os.Build.VERSION.SDK_INT >= 14) {
+			pullToRefreshAttacher.setRefreshableView(lvComments, new PullToRefreshAttacher.OnRefreshListener() {
+				@Override
+				public void onRefreshStarted(View view) {
+					requestComments(post.id);
+					requestLike(post.id, false);
+				}
+			});
+		}
 	}
 
 	private void requestComments(int postId) {
+		if (isLoading) {
+			return;
+		} else {
+			isLoading = true;
+		}
+		
 		new CommentsLoader().execute("http://14.63.219.181:3000/comment/load/" + postId);
 	}
 	
@@ -285,10 +299,24 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
         super.onSaveInstanceState(outState);
         facebookHelper.saveSession(outState);
     }
+
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	
+    	if (android.os.Build.VERSION.SDK_INT >= 14) {
+    		pullToRefreshAttacher.setRefreshComplete();
+    	}
+    }
     
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-//		getSupportMenuInflater().inflate(R.menu.recipe, menu);
+		getSupportMenuInflater().inflate(R.menu.recipe, menu);
+		
+		if (android.os.Build.VERSION.SDK_INT >= 14) {
+			MenuItem refresh = menu.findItem(R.id.action_refresh);
+			refresh.setVisible(false);
+		}
 		return true;		
 	}
 	
@@ -298,6 +326,12 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		case android.R.id.home:
 			finish();
 			return true;
+		case R.id.action_refresh:
+			findViewById(R.id.pb_main_loading).setVisibility(View.VISIBLE);
+			
+			requestComments(postId);
+			requestLike(postId, false);
+        	break;			
 		}
 		
 		return super.onOptionsItemSelected(item);
@@ -376,7 +410,12 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		
 		@Override
 		protected void onPostExecute(Object result) {
-			pullToRefreshAttacher.setRefreshComplete();
+			if (android.os.Build.VERSION.SDK_INT >= 14) {
+				pullToRefreshAttacher.setRefreshComplete();
+			} else {
+				isLoading = false;
+				findViewById(R.id.pb_main_loading).setVisibility(View.GONE);
+			}
 			
 			if (result == null) {
 				llLoadingMsg.setVisibility(View.VISIBLE);

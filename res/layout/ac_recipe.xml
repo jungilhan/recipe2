@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="#e8e8e8" >
     
     <ListView
         android:id="@+id/lv_comments"
@@ -41,6 +42,7 @@
 		            android:layout_width="match_parent"
 		            android:layout_height="match_parent"
 		            android:gravity="left|center_vertical"
+		            android:visibility="gone"
 		            android:clickable="true" >
 		            <ImageView
 		                android:id="@+id/iv_like"
@@ -51,9 +53,10 @@
 		        </LinearLayout>
                 <ProgressBar 
                     android:id="@+id/pb_like"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone" />        
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_gravity="left|center_vertical"
+                    android:visibility="visible" />        
             </FrameLayout>
 	
 	        <EditText
@@ -71,4 +74,11 @@
 	            android:src="@drawable/btn_send" />
 	    </LinearLayout>
     </LinearLayout>
+    
+    <ProgressBar 
+        android:id="@+id/pb_main_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" 
+        android:visibility="gone" />
 </RelativeLayout>

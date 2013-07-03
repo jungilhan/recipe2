@@ -15,6 +15,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -50,6 +51,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	private PullToRefreshAttacher pullToRefreshAttacher;	
 	private FacebookHelper facebookHelper;
 	private MenuItem actionbarLogin;
+	private boolean isLoading = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,20 +66,24 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
     
 	private void setupViews() {
 		getSupportActionBar().setIcon(R.drawable.abs_icon);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		
 		adapter = new ThumbnailAdapter(this, thumbnails);
 		gvThumbnail = (GridView)findViewById(R.id.sgv_thumbnail);
 		gvThumbnail.setNumColumns(2);
 		gvThumbnail.setAdapter(adapter);
 	
+		
 		pullToRefreshAttacher = new PullToRefreshAttacher(this);
-		pullToRefreshAttacher.setRefreshableView(gvThumbnail, (PullToRefreshAttacher.ViewDelegate)new ScrollViewDelegate(), 
-				new PullToRefreshAttacher.OnRefreshListener() {
-			@Override
-			public void onRefreshStarted(View view) {
-				requestRecipe(Constants.QUERY_COUNT, false);		
-			}
-		});
+		if (android.os.Build.VERSION.SDK_INT >= 14) {
+			pullToRefreshAttacher.setRefreshableView(gvThumbnail, (PullToRefreshAttacher.ViewDelegate)new ScrollViewDelegate(), 
+					new PullToRefreshAttacher.OnRefreshListener() {
+				@Override
+				public void onRefreshStarted(View view) {
+					requestRecipe(Constants.QUERY_COUNT, false);		
+				}
+			});
+		}
 	}
 	
     @Override
@@ -104,13 +110,29 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
         facebookHelper.saveSession(outState);
     }
     
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	
+    	if (android.os.Build.VERSION.SDK_INT >= 14) {
+    		pullToRefreshAttacher.setRefreshComplete();
+    	}
+    }
+    
 	private void requestRecipe(int count, boolean showProgressBar) {
+		if (isLoading) {
+			return;
+		} else {
+			isLoading = true;
+		}
+		
+		findViewById(R.id.pb_main_loading).setVisibility(showProgressBar == true ? View.VISIBLE : View.GONE);
     	new RecipeLoader().execute(WPRestApi.getPostsUrl(count, false), showProgressBar);
     }
 	
 	private class RecipeLoader extends AsyncTask {
 		private TextView tvError = (TextView)findViewById(R.id.tv_error);
-		private ProgressBar pbLoading = (ProgressBar)findViewById(R.id.pb_loading);
+		private ProgressBar pbLoading = (ProgressBar)findViewById(R.id.pb_main_loading);
 		
 		@Override
 		protected Object doInBackground(Object... params) {
@@ -141,7 +163,11 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		
 		@Override
 		protected void onPostExecute(Object result) {
-			pullToRefreshAttacher.setRefreshComplete();
+			if (android.os.Build.VERSION.SDK_INT >= 14) {
+				pullToRefreshAttacher.setRefreshComplete();
+			} else {
+				isLoading = false;
+			}
 			
 			if (result == null) {
 				tvError.setVisibility(View.VISIBLE);
@@ -205,6 +231,11 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.home, menu);
 		actionbarLogin = menu.findItem(R.id.action_login);
+		
+		if (android.os.Build.VERSION.SDK_INT >= 14) {
+			MenuItem refresh = menu.findItem(R.id.action_refresh);
+			refresh.setVisible(false);
+		}
 		return true;		
 	}
 	
@@ -224,6 +255,9 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
         	} else {
         		showLogoutDialog();
         	}
+        	break;
+        case R.id.action_refresh:
+        	requestRecipe(Constants.QUERY_COUNT, true);
         	break;
         }
         return super.onOptionsItemSelected(item);
