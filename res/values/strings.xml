@@ -13,7 +13,9 @@
     <string name="login_guide">\"댓글\" 및 \"좋아요\"는 로그인 사용자만 남길 수 있습니다. 페이스북 계정으로 로그인 하시겠습니까?</string>
     <string name="ok">확인</string>
     <string name="cancel">취소</string>
-    <string name="empty_comments">첫 댓글을 남겨보세요! :D</string>
+    <string name="like_msg">이 레시피에 \"좋아요\"를 남겼습니다.</string>
+    <string name="unlike_msg">\"좋아요\"를 취소했습니다.</string>
+    <string name="empty_comments">첫 댓글을 남겨보세요!</string>
     <string name="loading_comments">댓글을 불러오는 중입니다...</string>
     <string name="loading_error">데이터를 불러오지 못했습니다.\n잠시 후 다시 시도 하세요.</string>
     <string name="applicationId">503802709675152</string>

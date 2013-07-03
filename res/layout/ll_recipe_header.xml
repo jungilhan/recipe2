@@ -55,7 +55,7 @@
                 android:layout_marginLeft="6dp"
                 android:textSize="15sp"
                 android:textColor="#666"
-                android:text="0"/>
+                android:text="--"/>
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
                 android:layout_marginLeft="6dp"
                 android:textSize="15sp"
                 android:textColor="#666"
-                android:text="0"/>
+                android:text="--"/>
         </LinearLayout>
     </RelativeLayout>
     

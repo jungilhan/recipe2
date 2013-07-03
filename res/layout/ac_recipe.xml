@@ -33,20 +33,28 @@
 	        android:paddingRight="10dp"
 	        android:paddingTop="6dp" >
 	    
-	        <LinearLayout 
-	            android:id="@+id/ll_like_wrapper"
+	        <FrameLayout
 	            android:layout_width="38dp"
-	            android:layout_height="38dp"
-	            android:gravity="center"
-	            android:clickable="true" >
-	            <ImageView
-	                android:id="@+id/iv_like"
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content"
-	                android:duplicateParentState="true"
-	                android:src="@drawable/ic_comment_like" />	            
-	        </LinearLayout>
-
+	            android:layout_height="38dp" >
+		        <LinearLayout 
+		            android:id="@+id/ll_like_wrapper"
+		            android:layout_width="match_parent"
+		            android:layout_height="match_parent"
+		            android:gravity="left|center_vertical"
+		            android:clickable="true" >
+		            <ImageView
+		                android:id="@+id/iv_like"
+		                android:layout_width="wrap_content"
+		                android:layout_height="wrap_content"
+		                android:duplicateParentState="true"
+		                android:src="@drawable/btn_like" />
+		        </LinearLayout>
+                <ProgressBar 
+                    android:id="@+id/pb_like"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone" />        
+            </FrameLayout>
 	
 	        <EditText
 	            android:id="@+id/et_comment"

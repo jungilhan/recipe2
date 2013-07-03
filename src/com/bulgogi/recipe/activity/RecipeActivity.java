@@ -34,6 +34,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,7 +70,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	private FacebookHelper facebookHelper;
 	private InputMethodManager inputMethodManager;
 	private ImageView ivLike;
-	 
+	private ProgressBar pbLike;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -83,7 +85,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		setupView(post);
 		
 		requestComments(post.id);
-		requestLike(post.id);
+		requestLike(post.id, false);
 	}
 
 	private void setupView(final Post post) {		
@@ -91,6 +93,9 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		getSupportActionBar().setDisplayShowHomeEnabled(false);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
 		getSupportActionBar().setTitle(post.title);
+		
+		pbLike = (ProgressBar)findViewById(R.id.pb_like);
+		pbLike.setVisibility(View.GONE);
 		
 		LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		llHeader = (LinearLayout)inflater.inflate(R.layout.ll_recipe_header, null);
@@ -176,7 +181,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 								httpApi.post("http://14.63.219.181:3000/like", params);
 							}
 							
-							requestLike(postId);
+							requestLike(postId, true);
 						}
 					}).start();
 				}
@@ -237,7 +242,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			@Override
 			public void onRefreshStarted(View view) {
 				requestComments(post.id);
-				requestLike(post.id);
+				requestLike(post.id, false);
 			}
 		});
 	}
@@ -246,8 +251,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		new CommentsLoader().execute("http://14.63.219.181:3000/comment/load/" + postId);
 	}
 	
-	private void requestLike(int postId) {
-		new LikeLoader().execute("http://14.63.219.181:3000/like/" + postId);
+	private void requestLike(int postId, boolean showToast) {
+		new LikeLoader().execute("http://14.63.219.181:3000/like/" + postId, showToast);
 	}
 	
 	private boolean isAlreadyLike(long facebookId) {
@@ -419,12 +424,14 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	
 	private class LikeLoader extends AsyncTask {				
 		private TextView tvLike = (TextView)llHeader.findViewById(R.id.tv_count_like); 
+		private Boolean showToast;
 		
 		@Override
 		protected Object doInBackground(Object... params) {
 			ObjectMapper mapper = new ObjectMapper();
 			ArrayList<Like> likes = new ArrayList<Like>();
-			
+			showToast = (Boolean)params[1]; 
+					
 			try {
 				likes = mapper.readValue(new URL((String)params[0]), new TypeReference<List<Like>>(){});
 			} catch (JsonGenerationException e) {
@@ -441,18 +448,44 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		}
 		
 		@Override
-		protected void onPostExecute(Object result) {
-			ArrayList<Like> likes = (ArrayList<Like>)result;
+        protected void onPreExecute() {
+			super.onPreExecute();
 			
-			likeList = likes;
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					pbLike.setVisibility(View.VISIBLE);
+					ivLike.setVisibility(View.GONE);
+				}
+			});			
+		}
+		
+		@Override
+		protected void onPostExecute(Object result) {
+			pbLike.setVisibility(View.GONE);
+			ivLike.setVisibility(View.VISIBLE);
+			
+			likeList = (ArrayList<Like>)result;
 			tvLike.setText(Integer.toString(likeList.size()));
 			
 			if (likeList.size() > 0 && facebookHelper.getId() != null) {
 				if (isAlreadyLike(Long.parseLong(facebookHelper.getId()))) {
-					ivLike.setImageResource(R.drawable.ic_comment_unlike);
+					if (showToast) {
+						Toast.makeText(RecipeActivity.this, R.string.like_msg, Toast.LENGTH_SHORT).show();
+					}
+					ivLike.setImageResource(R.drawable.btn_unlike);
+					
+				} else {
+					if (showToast) {
+						Toast.makeText(RecipeActivity.this, R.string.unlike_msg, Toast.LENGTH_SHORT).show();
+					}
+					ivLike.setImageResource(R.drawable.btn_like);
 				}
 			} else {
-				ivLike.setImageResource(R.drawable.ic_comment_like);
+				if (showToast) {
+					Toast.makeText(RecipeActivity.this, R.string.unlike_msg, Toast.LENGTH_SHORT).show();
+				}
+				ivLike.setImageResource(R.drawable.btn_like);
 			}
 		}		
 	}

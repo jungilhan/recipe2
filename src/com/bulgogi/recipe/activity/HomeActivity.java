@@ -134,6 +134,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		
 		@Override
         protected void onPreExecute() {
+			super.onPreExecute();
+			
 			tvError.setVisibility(View.GONE);
 			pbLoading.setVisibility(View.VISIBLE);			
 		}
