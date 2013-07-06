@@ -1,6 +1,7 @@
 package com.bulgogi.recipe.activity;
 
 import java.io.IOException;
+
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -42,9 +43,12 @@ import com.facebook.widget.ProfilePictureView;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.localytics.android.*;
 
 public class HomeActivity extends SherlockActivity implements Session.StatusCallback {
 	private static final String TAG = HomeActivity.class.getSimpleName();
+	
+	private LocalyticsSession localyticsSession;
 	
 	private ArrayList<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
 	private GridView gvThumbnail;
@@ -63,6 +67,10 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	    
 		setupViews();
 		requestRecipe(Constants.QUERY_COUNT, true);
+		
+		localyticsSession = new LocalyticsSession(this);
+		localyticsSession.open();
+		localyticsSession.upload();
 	}
     
 	private void setupViews() {
@@ -113,7 +121,15 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
     }
     
     @Override
+    public void onResume() {
+    	super.onResume();
+    	localyticsSession.open();
+    }
+    
+    @Override
     protected void onPause() {
+    	localyticsSession.close();
+        localyticsSession.upload();
     	super.onPause();
     	
     	if (android.os.Build.VERSION.SDK_INT >= 14) {
