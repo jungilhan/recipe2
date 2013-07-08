@@ -6,10 +6,14 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -89,7 +93,6 @@ public class ThumbnailAdapter extends BaseAdapter {
 		Thumbnail thumbnail = thumbnails.get(position);
 		
 		if (convertView == null) {
-			LayoutInflater inflator = LayoutInflater.from(context);
 			convertView = inflator.inflate(R.layout.ll_thumbnail, null);
 			
 			holder = new ViewHolder();
@@ -111,9 +114,32 @@ public class ThumbnailAdapter extends BaseAdapter {
 				Intent intent = new Intent(context, RecipeActivity.class);
 		        Thumbnail thumbnail = thumbnails.get(position);
 		        intent.putExtra(Extra.POST, (Serializable)thumbnail.getPost());
-		        context.startActivity(intent);
+		        context.startActivity(intent);		        
 			}
 		});
+		
+		holder.container.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				Drawable drawable = holder.ivThumbnail.getDrawable();
+				if (drawable == null) {
+					return false;
+				}
+				
+				switch (event.getAction()) {
+					case MotionEvent.ACTION_DOWN:
+						drawable.setColorFilter(0x22000000, PorterDuff.Mode.SRC_ATOP);
+						holder.ivThumbnail.invalidate();
+						break;
+					case MotionEvent.ACTION_UP:
+	                case MotionEvent.ACTION_CANCEL:
+	                	drawable.clearColorFilter();
+	                	holder.ivThumbnail.invalidate();
+	                	break;
+				}
+				return false;
+			}
+		});			
 		
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(holder.ivThumbnail.getLayoutParams());
 		lp.width = imageBounds.right - imageBounds.left;

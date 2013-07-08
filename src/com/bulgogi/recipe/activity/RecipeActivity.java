@@ -205,7 +205,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 						final String comment = etComment.getText().toString();
 
 						if (id == null || (id != null && id.equals(""))) {
-							Toast.makeText(RecipeActivity.this, "로그인 정보를 불러오는데 실패했습니다. 잠시 후에 다시 댓글을 전송해보세요.", Toast.LENGTH_LONG).show();
+							Toast.makeText(RecipeActivity.this, getResources().getString(R.string.comment_send_error), Toast.LENGTH_LONG).show();
 							return;
 						}
 						
