@@ -46,7 +46,6 @@ import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.adapter.CommentAdapter;
 import com.bulgogi.recipe.adapter.RecipePagerAdapter;
 import com.bulgogi.recipe.auth.FacebookHelper;
-import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.config.Constants.Extra;
 import com.bulgogi.recipe.http.HttpApi;
 import com.bulgogi.recipe.http.model.Comment;

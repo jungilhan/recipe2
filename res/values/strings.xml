@@ -18,6 +18,9 @@
     <string name="empty_comments">첫 댓글을 남겨보세요!</string>
     <string name="loading_comments">댓글을 불러오는 중입니다...</string>
     <string name="loading_error">데이터를 불러오지 못했습니다.\n잠시 후 다시 시도 하세요.</string>
+    <string name="loading_error_home">레시피 정보를 불러오지 못했습니다.\n네트워크 상태를 확인하세요.</string>
+    <string name="login_success_facebook">페이스북 계정으로 로그인되었습니다.</string>
+    <string name="logout_success">로그아웃되었습니다.</string>
     <string name="application_id">503802709675152</string>
     <string name="localytics_id">f35bdc28310c39d1fabf523-1f941e08-e550-11e2-364a-00a426b17dd8</string>
 

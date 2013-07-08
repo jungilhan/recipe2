@@ -1,7 +1,6 @@
 package com.bulgogi.recipe.activity;
 
 import java.io.IOException;
-
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -43,7 +43,7 @@ import com.facebook.widget.ProfilePictureView;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.localytics.android.*;
+import com.localytics.android.LocalyticsSession;
 
 public class HomeActivity extends SherlockActivity implements Session.StatusCallback {
 	private static final String TAG = HomeActivity.class.getSimpleName();
@@ -90,7 +90,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 					new PullToRefreshAttacher.OnRefreshListener() {
 				@Override
 				public void onRefreshStarted(View view) {
-					requestRecipe(Constants.QUERY_COUNT, false);		
+					requestRecipe(Constants.QUERY_COUNT, false);
 				}
 			});
 		}
@@ -149,7 +149,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
     }
 	
 	private class RecipeLoader extends AsyncTask {
-		private TextView tvError = (TextView)findViewById(R.id.tv_error);
+		private LinearLayout llError = (LinearLayout)findViewById(R.id.ll_error);
 		private ProgressBar pbLoading = (ProgressBar)findViewById(R.id.pb_main_loading);
 		
 		@Override
@@ -176,7 +176,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
         protected void onPreExecute() {
 			super.onPreExecute();
 			
-			tvError.setVisibility(View.GONE);
+			llError.setVisibility(View.GONE);
 		}
 		
 		@Override
@@ -187,17 +187,17 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			
 			isLoading = false;
 			
-			if (result == null) {
-				tvError.setVisibility(View.VISIBLE);
-				return;
-			} else {
-				tvError.setVisibility(View.GONE);
-				gvThumbnail.setVisibility(View.VISIBLE);	
-			}
-			
 			if (pbLoading.getVisibility() == View.VISIBLE) {
 				pbLoading.setVisibility(View.GONE);	
 			}
+			
+			if (result == null) {
+				llError.setVisibility(View.VISIBLE);
+				return;
+			} else {
+				llError.setVisibility(View.GONE);
+				gvThumbnail.setVisibility(View.VISIBLE);	
+			}			
 
 			Posts posts = (Posts)result;
 			//Log.d(TAG, posts.toString());
@@ -317,5 +317,9 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		if (session != null && session.isOpened()) {
     		facebookHelper.makeMeRequest(session);
 		}
-	}	
+	}
+	
+	 public void onRefreshClicked(View v) {
+		 requestRecipe(Constants.QUERY_COUNT, true);
+	 }
 }

@@ -3,7 +3,9 @@ package com.bulgogi.recipe.auth;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
+import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.utils.PreferenceHelper;
 import com.facebook.LoggingBehavior;
@@ -57,6 +59,8 @@ public class FacebookHelper {
             
             PreferenceHelper.getInstance().putString(Constants.PREF_NAME, null);
 			PreferenceHelper.getInstance().putString(Constants.PREF_FACEBOOK_ID, null);
+			
+			Toast.makeText(activity, activity.getResources().getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
         }
 	}
 	
