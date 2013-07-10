@@ -6,7 +6,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ScrollViewDelegate;
@@ -19,6 +21,7 @@ import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.LinearLayout;
@@ -34,6 +37,7 @@ import com.bulgogi.recipe.application.RecipeApplication;
 import com.bulgogi.recipe.auth.FacebookHelper;
 import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.http.WPRestApi;
+import com.bulgogi.recipe.http.model.Count;
 import com.bulgogi.recipe.http.model.Post;
 import com.bulgogi.recipe.http.model.Posts;
 import com.bulgogi.recipe.model.Thumbnail;
@@ -41,6 +45,7 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.widget.ProfilePictureView;
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.localytics.android.LocalyticsSession;
@@ -51,6 +56,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	private LocalyticsSession localyticsSession;
 	
 	private ArrayList<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
+	private HashMap<Integer, Count> countMap = new HashMap<Integer, Count>();
 	private GridView gvThumbnail;
 	private ThumbnailAdapter adapter;
 	private PullToRefreshAttacher pullToRefreshAttacher;	
@@ -67,6 +73,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	    
 		setupViews();
 		requestRecipe(Constants.QUERY_COUNT, true);
+		requestCountInfo();
 		
 		localyticsSession = new LocalyticsSession(this);
 		localyticsSession.open();
@@ -91,6 +98,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				@Override
 				public void onRefreshStarted(View view) {
 					requestRecipe(Constants.QUERY_COUNT, false);
+					requestCountInfo();
 				}
 			});
 		}
@@ -147,6 +155,10 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		findViewById(R.id.pb_main_loading).setVisibility(showProgressBar == true ? View.VISIBLE : View.GONE);
     	new RecipeLoader().execute(WPRestApi.getPostsUrl(count, false), showProgressBar);
     }
+	
+	private void requestCountInfo() {
+		//new CountInfoLoader().execute();
+	}
 	
 	private class RecipeLoader extends AsyncTask {
 		private LinearLayout llError = (LinearLayout)findViewById(R.id.ll_error);
@@ -220,6 +232,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				}
 			});
 			
+			updateCountInfo();
+			
 			adapter.notifyDataSetChanged();
 		}
 		
@@ -242,6 +256,59 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				}
 			}			
 			return false;
+		}
+	}
+	
+	private class CountInfoLoader extends AsyncTask {		
+		@Override
+		protected Object doInBackground(Object... params) {
+			ObjectMapper mapper = new ObjectMapper();
+			ArrayList<Count> counts = null;
+			
+			try {
+				counts = mapper.readValue(new URL((String)params[0]), new TypeReference<List<Count>>(){});
+			} catch (JsonGenerationException e) {
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				e.printStackTrace();				
+			} catch (UnknownHostException e) { 				
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+						
+			return counts;
+		}		
+		
+		@Override
+		protected void onPostExecute(Object result) {
+			if (result == null) {
+				return;
+			}
+			
+			ArrayList<Count> counts = (ArrayList<Count>)result;
+			Log.d(TAG, counts.toString());
+			
+			for (Count count : counts) {
+				countMap.put(count.postId, count);	
+			}
+			
+			updateCountInfo();
+			
+			if (thumbnails.size() > 0) {
+				adapter.notifyDataSetChanged();
+			}
+		}
+	}
+	
+	private void updateCountInfo() {
+		for (Thumbnail thumbnail : thumbnails) {
+			int postId = thumbnail.getId();
+			Count count = countMap.get(postId);		
+			if (count != null) {
+				thumbnail.setLikeCount(count.like);
+				thumbnail.setCommentCount(count.comment);
+			}				
 		}
 	}
 	
@@ -276,6 +343,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
         	break;
         case R.id.action_refresh:
         	requestRecipe(Constants.QUERY_COUNT, true);
+        	requestCountInfo();
         	break;
         }
         return super.onOptionsItemSelected(item);

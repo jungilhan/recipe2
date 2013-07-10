@@ -5,6 +5,8 @@ import com.bulgogi.recipe.http.model.Post;
 
 public class Thumbnail {	
 	private Post post;
+	private long likeCount;
+	private long commentCount;
 	
 	public Thumbnail(Post post) {
 		this.post = post;
@@ -45,4 +47,20 @@ public class Thumbnail {
 		
 		return post.getChef().url;
 	}
+	
+	public void setLikeCount(long count) {
+		likeCount = count;
+	}
+	
+	public long getLikeCount() {
+		return likeCount;
+	}
+	
+	public void setCommentCount(long count) {
+		commentCount = count;
+	}
+
+	public long getCommentCount() {
+		return commentCount;
+	}	
 }

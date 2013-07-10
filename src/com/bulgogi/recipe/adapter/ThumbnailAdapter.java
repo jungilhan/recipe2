@@ -46,8 +46,10 @@ public class ThumbnailAdapter extends BaseAdapter {
 		TextView tvEpisode;
 		TextView tvChef;
 		ImageView ivChef;
-		TextView tvFood;		
-		View pbLoading;
+		TextView tvFood;
+		TextView tvLikeCount;
+		TextView tvCommentCount;
+		View pbLoading;		
 	}
 	
 	public ThumbnailAdapter(Context context, ArrayList<Thumbnail> thumbnails) {
@@ -59,8 +61,7 @@ public class ThumbnailAdapter extends BaseAdapter {
 		.cacheOnDisc()
 		.resetViewBeforeLoading()
 		.build();
-		
-		
+				
 		int columns = RecipeApplication.isTablet() == true ? Constants.GRIDVIEW_TABLET_COLUMNS : Constants.GRIDVIEW_DEFAULT_COLUMNS;
 		int imageWidth = (context.getResources().getDisplayMetrics().widthPixels / columns) 
 				- context.getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin)
@@ -102,7 +103,9 @@ public class ThumbnailAdapter extends BaseAdapter {
 			holder.tvEpisode = (TextView)convertView.findViewById(R.id.tv_episode);
 			holder.tvChef = (TextView)convertView.findViewById(R.id.tv_chef);			
 			holder.ivChef = (ImageView)convertView.findViewById(R.id.iv_chef);
-			holder.tvFood = (TextView)convertView.findViewById(R.id.tv_food);			
+			holder.tvFood = (TextView)convertView.findViewById(R.id.tv_food);
+			holder.tvLikeCount = (TextView)convertView.findViewById(R.id.tv_count_like);
+			holder.tvCommentCount = (TextView)convertView.findViewById(R.id.tv_count_comment);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder)convertView.getTag();
@@ -175,6 +178,8 @@ public class ThumbnailAdapter extends BaseAdapter {
 		holder.tvEpisode.setText(thumbnail.getEpisode() + context.getResources().getString(R.string.episode_postfix));
 		holder.tvFood.setText(thumbnail.getFood());		
 		holder.tvChef.setText(thumbnail.getChef());
+		holder.tvLikeCount.setText(Long.toString(thumbnail.getLikeCount()));
+		holder.tvCommentCount.setText(Long.toString(thumbnail.getCommentCount()));
 		
 		return convertView;
 	}	
