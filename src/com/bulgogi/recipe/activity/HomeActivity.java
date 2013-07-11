@@ -36,6 +36,7 @@ import com.bulgogi.recipe.adapter.ThumbnailAdapter;
 import com.bulgogi.recipe.application.RecipeApplication;
 import com.bulgogi.recipe.auth.FacebookHelper;
 import com.bulgogi.recipe.config.Constants;
+import com.bulgogi.recipe.http.NodeRestApi;
 import com.bulgogi.recipe.http.WPRestApi;
 import com.bulgogi.recipe.http.model.Count;
 import com.bulgogi.recipe.http.model.Post;
@@ -157,7 +158,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
     }
 	
 	private void requestCountInfo() {
-		//new CountInfoLoader().execute();
+		new CountInfoLoader().execute(NodeRestApi.getCountInfoUrl());
 	}
 	
 	private class RecipeLoader extends AsyncTask {
@@ -290,7 +291,10 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			Log.d(TAG, counts.toString());
 			
 			for (Count count : counts) {
-				countMap.put(count.postId, count);	
+				// [TODO] 서버에서 좋아요 혹은 댓글을 작성했다가 취소할 때 동일한 PostID로 값이 두번오는 버그로 클라이언트에서 예외처리 함
+				if (!countMap.containsKey(count.postId)) { 
+					countMap.put(count.postId, count);	
+				}
 			}
 			
 			updateCountInfo();
@@ -306,8 +310,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			int postId = thumbnail.getId();
 			Count count = countMap.get(postId);		
 			if (count != null) {
-				thumbnail.setLikeCount(count.like);
-				thumbnail.setCommentCount(count.comment);
+				thumbnail.setLikeCount(count.likes);
+				thumbnail.setCommentCount(count.comments);
 			}				
 		}
 	}

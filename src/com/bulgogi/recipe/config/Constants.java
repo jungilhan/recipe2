@@ -10,7 +10,7 @@ public class Constants {
 	public static final int GRIDVIEW_TABLET_COLUMNS = 3;
 	
 	public static class Config {
-
+		public static final boolean DEBUG = true;
 	}
 	
 	public static class Extra {
