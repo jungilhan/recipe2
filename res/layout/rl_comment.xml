@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/iv_profile"
         android:layout_marginLeft="10dp"
-        android:textSize="14sp"
+        android:textSize="@dimen/h4"
         android:textColor="#41b1b5"
         android:textStyle="bold"
         android:text="" />
@@ -29,7 +29,7 @@
         android:layout_toRightOf="@id/tv_name"
         android:layout_alignBottom="@id/tv_name"
         android:layout_marginLeft="8dp"
-        android:textSize="12sp"
+        android:textSize="@dimen/h5"
         android:textColor="#666"
         android:text="" />
     <TextView
@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_name"
         android:layout_alignLeft="@id/tv_name"
-        android:textSize="14sp"
+        android:textSize="@dimen/h4"
         android:textColor="#666"
         android:text="" />
 
