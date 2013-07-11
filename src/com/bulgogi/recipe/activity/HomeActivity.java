@@ -73,8 +73,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		facebookHelper = new FacebookHelper(this, savedInstanceState, this);		
 	    
 		setupViews();
-		requestRecipe(Constants.QUERY_COUNT, true);
 		requestCountInfo();
+		requestRecipe(Constants.QUERY_COUNT, true);
 		
 		localyticsSession = new LocalyticsSession(this);
 		localyticsSession.open();
@@ -98,8 +98,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 					new PullToRefreshAttacher.OnRefreshListener() {
 				@Override
 				public void onRefreshStarted(View view) {
-					requestRecipe(Constants.QUERY_COUNT, false);
 					requestCountInfo();
+					requestRecipe(Constants.QUERY_COUNT, false);
 				}
 			});
 		}
@@ -290,11 +290,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			ArrayList<Count> counts = (ArrayList<Count>)result;
 			Log.d(TAG, counts.toString());
 			
-			for (Count count : counts) {
-				// [TODO] 서버에서 좋아요 혹은 댓글을 작성했다가 취소할 때 동일한 PostID로 값이 두번오는 버그로 클라이언트에서 예외처리 함
-				if (!countMap.containsKey(count.postId)) { 
-					countMap.put(count.postId, count);	
-				}
+			for (Count count : counts) { 
+				countMap.put(count.postId, count);	
 			}
 			
 			updateCountInfo();
@@ -346,8 +343,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
         	}
         	break;
         case R.id.action_refresh:
-        	requestRecipe(Constants.QUERY_COUNT, true);
         	requestCountInfo();
+        	requestRecipe(Constants.QUERY_COUNT, true);
         	break;
         }
         return super.onOptionsItemSelected(item);
