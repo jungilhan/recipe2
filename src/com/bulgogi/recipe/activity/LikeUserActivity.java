@@ -52,7 +52,7 @@ public class LikeUserActivity extends SherlockListActivity {
 			final int index = i; 
 		
 			AsyncHttpClient client = new AsyncHttpClient();
-			client.get(FBRestApi.getPostCommentUrl(user.facebookId), new AsyncHttpResponseHandler() {
+			client.get(FBRestApi.getNameUrl(user.facebookId), new AsyncHttpResponseHandler() {
 			    @Override
 			    public void onSuccess(String response) {
 					try {

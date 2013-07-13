@@ -56,6 +56,7 @@ import com.bulgogi.recipe.adapter.RecipePagerAdapter;
 import com.bulgogi.recipe.auth.FacebookHelper;
 import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.config.Constants.Extra;
+import com.bulgogi.recipe.http.FBRestApi;
 import com.bulgogi.recipe.http.HttpApi;
 import com.bulgogi.recipe.http.NodeRestApi;
 import com.bulgogi.recipe.http.model.Comment;
@@ -228,7 +229,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 						final int postId = post.id;
 						String id = facebookHelper.getId();
 						String name = facebookHelper.getName();
-						String thumbnail = "http://graph.facebook.com/" + id + "/picture?type=normal";
+						String thumbnail = FBRestApi.getProfileUrl(Long.parseLong(id));
 						String comment = etComment.getText().toString();
 
 						if (id == null || (id != null && id.equals(""))) {
@@ -481,7 +482,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			llLikeUsers.addView(ivUser);
 			
 			Like like = likes.get(i);	
-			imageLoader.displayImage("http://graph.facebook.com/" + like.facebookId + "/picture?type=normal", ivUser, options, new SimpleImageLoadingListener() {
+			imageLoader.displayImage(FBRestApi.getProfileUrl(like.facebookId), ivUser, options, new SimpleImageLoadingListener() {
 				@Override
 				public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 					Animation animation = AnimationUtils.loadAnimation(RecipeActivity.this, R.anim.fade_in);
