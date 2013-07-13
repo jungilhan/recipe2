@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.bulgogi.recipe.http.model.Comment;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
 public class CommentAdapter extends BaseAdapter {
 	private Context context;
@@ -42,11 +44,11 @@ public class CommentAdapter extends BaseAdapter {
 		this.comments = comments;
 		this.options = new DisplayImageOptions.Builder()
 		.cacheInMemory()
-		.cacheOnDisc()
 		.resetViewBeforeLoading()
 		.showImageForEmptyUri(R.drawable.ic_blank_profile)
 		.showImageOnFail(R.drawable.ic_blank_profile)
 		.showStubImage(R.drawable.ic_blank_profile)
+		.bitmapConfig(Config.RGB_565)
 		.build();		
 	}
 	
