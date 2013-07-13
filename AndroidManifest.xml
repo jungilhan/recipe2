@@ -48,6 +48,7 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/application_id" />
         <meta-data android:name="LOCALYTICS_APP_KEY" android:value="@string/localytics_id" />
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="da0cd6a4f387bb2626cddeb540c5956f9a46921e"/>
     </application>
 
 </manifest>
