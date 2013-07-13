@@ -564,12 +564,13 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			
 			Collections.sort(commentList, new Comparator<Comment>() {
 				public int compare(Comment s1, Comment s2) {
-					if (s1.commentId > s2.commentId)
+					if (s1.commentId > s2.commentId) {
 						return 1;
-					else if (s1.commentId < s2.commentId)
+					} else if (s1.commentId < s2.commentId) {
 						return -1;
-					else
+					} else {
 						return 0;
+					}
 				}
 			});
 			
@@ -632,6 +633,18 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			pbLike.setVisibility(View.GONE);
 
 			likeList = (ArrayList<Like>) result;
+			Collections.sort(likeList, new Comparator<Like>() {
+				public int compare(Like s1, Like s2) {
+					if (s1.likeId > s2.likeId) {
+						return -1;
+					} else if (s1.likeId < s2.likeId) {
+						return 1;
+					} else {
+						return 0;
+					}
+				}
+			});
+			
 			tvLike.setText(Integer.toString(likeList.size()));
 			showLikeUser(likeList);
 
