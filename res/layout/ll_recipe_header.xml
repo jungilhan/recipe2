@@ -54,9 +54,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
+                android:minWidth="8dp"
                 android:textSize="@dimen/h3"
-                android:textColor="#666"
-                android:text="--"/>
+                android:textColor="#666"                
+                android:text=""/>
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -67,9 +68,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
+                android:minWidth="8dp"                
                 android:textSize="@dimen/h3"
                 android:textColor="#666"
-                android:text="--"/>
+                android:text=""/>
         </LinearLayout>
     </RelativeLayout>
     
