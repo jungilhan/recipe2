@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -31,13 +32,15 @@ import com.bulgogi.recipe.model.Thumbnail;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
 public class ThumbnailAdapter extends BaseAdapter {
 	private Context context;
 	private LayoutInflater inflator;
 	private ArrayList<Thumbnail> thumbnails;
 	private ImageLoader imageLoader = ImageLoader.getInstance();
-	private DisplayImageOptions options;
+	private DisplayImageOptions optionsThumbnail;
+	private DisplayImageOptions optionsChef;
 	private Rect imageBounds = new Rect();
 	
 	static class ViewHolder {
@@ -56,11 +59,22 @@ public class ThumbnailAdapter extends BaseAdapter {
 		this.context = context;
 		this.inflator = LayoutInflater.from(context);
 		this.thumbnails = thumbnails;
-		this.options = new DisplayImageOptions.Builder()
-		.cacheInMemory()
-		.cacheOnDisc()
-		.resetViewBeforeLoading()
-		.build();
+		this.optionsThumbnail = new DisplayImageOptions.Builder()
+			.cacheInMemory()
+			.cacheOnDisc()
+			.resetViewBeforeLoading()
+			.build();
+		
+		this.optionsChef = new DisplayImageOptions.Builder()
+			.cacheInMemory()
+			.cacheOnDisc()
+			.resetViewBeforeLoading()
+			.showImageForEmptyUri(R.drawable.ic_blank_profile)
+			.showImageOnFail(R.drawable.ic_blank_profile)
+			.showStubImage(R.drawable.ic_blank_profile)
+			.bitmapConfig(Config.RGB_565)
+			.displayer(new RoundedBitmapDisplayer(context.getResources().getDimensionPixelSize(R.dimen.profile_round)))
+			.build();
 				
 		int columns = RecipeApplication.isTablet() == true ? Constants.GRIDVIEW_TABLET_COLUMNS : Constants.GRIDVIEW_DEFAULT_COLUMNS;
 		int imageWidth = (context.getResources().getDisplayMetrics().widthPixels / columns) 
@@ -150,7 +164,7 @@ public class ThumbnailAdapter extends BaseAdapter {
 		lp.height = imageBounds.bottom - imageBounds.top;
 		holder.ivThumbnail.setLayoutParams(lp);
 
-		imageLoader.displayImage(thumbnail.getUrl(), holder.ivThumbnail, options, new SimpleImageLoadingListener() {
+		imageLoader.displayImage(thumbnail.getUrl(), holder.ivThumbnail, optionsThumbnail, new SimpleImageLoadingListener() {
 			@Override
 			public void onLoadingStarted(String imageUri, View view) {
 				holder.pbLoading.setVisibility(View.VISIBLE);
@@ -166,7 +180,7 @@ public class ThumbnailAdapter extends BaseAdapter {
 			}
 		});
 
-		imageLoader.displayImage(thumbnail.getChefImageUri(), holder.ivChef, options, new SimpleImageLoadingListener() {
+		imageLoader.displayImage(thumbnail.getChefImageUri(), holder.ivChef, optionsChef, new SimpleImageLoadingListener() {
 			@Override
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
