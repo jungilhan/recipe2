@@ -229,7 +229,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				public int compare(Thumbnail s1, Thumbnail s2) {
 					if (s1.getId() > s2.getId())
 						return -1;
-					else if (s1.getId() > s2.getId())
+					else if (s1.getId() < s2.getId())
 						return 1;
 					else
 						return 0;

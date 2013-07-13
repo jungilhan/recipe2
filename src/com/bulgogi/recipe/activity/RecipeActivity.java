@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -459,6 +461,18 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			}
 
 			tvCountComment.setText(Integer.toString(length));
+			
+			Collections.sort(commentList, new Comparator<Comment>() {
+				public int compare(Comment s1, Comment s2) {
+					if (s1.commentId > s2.commentId)
+						return 1;
+					else if (s1.commentId < s2.commentId)
+						return -1;
+					else
+						return 0;
+				}
+			});
+			
 			adapter.notifyDataSetChanged();
 		}
 
