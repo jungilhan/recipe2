@@ -24,6 +24,7 @@ import com.bulgogi.recipe.http.model.Comment;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
 public class CommentAdapter extends BaseAdapter {
 	private Context context;
@@ -42,12 +43,14 @@ public class CommentAdapter extends BaseAdapter {
 		this.context = context;
 		this.comments = comments;
 		this.options = new DisplayImageOptions.Builder()
-		.cacheInMemory()
-		.resetViewBeforeLoading()
-		.showImageForEmptyUri(R.drawable.ic_blank_profile)
-		.showImageOnFail(R.drawable.ic_blank_profile)
-		.showStubImage(R.drawable.ic_blank_profile)
-		.bitmapConfig(Config.RGB_565).build();
+			.cacheInMemory()
+			.resetViewBeforeLoading()
+			.showImageForEmptyUri(R.drawable.ic_blank_profile)
+			.showImageOnFail(R.drawable.ic_blank_profile)
+			.showStubImage(R.drawable.ic_blank_profile)
+			.bitmapConfig(Config.RGB_565)
+			.displayer(new RoundedBitmapDisplayer(context.getResources().getDimensionPixelSize(R.dimen.profile_round)))
+			.build();
 	}
 
 	@Override
@@ -84,7 +87,11 @@ public class CommentAdapter extends BaseAdapter {
 		}
 
 		Comment comment = comments.get(position);
-		imageLoader.displayImage(comment.thumbnail, holder.ivProfile, options, new SimpleImageLoadingListener() {
+		String url = comment.thumbnail;
+		if (url.contains("?type=small")) {
+			url = url.replace("?type=small", "?type=normal");
+		}
+		imageLoader.displayImage(url, holder.ivProfile, options, new SimpleImageLoadingListener() {
 			@Override
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);

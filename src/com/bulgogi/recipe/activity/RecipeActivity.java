@@ -17,6 +17,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -25,13 +29,17 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Html;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -61,6 +69,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.viewpagerindicator.CirclePageIndicator;
 
 public class RecipeActivity extends SherlockActivity implements OnClickListener, Session.StatusCallback {
@@ -214,7 +226,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 						final int postId = post.id;
 						String id = facebookHelper.getId();
 						String name = facebookHelper.getName();
-						String thumbnail = "http://graph.facebook.com/" + id + "/picture?type=small";
+						String thumbnail = "http://graph.facebook.com/" + id + "/picture?type=normal";
 						String comment = etComment.getText().toString();
 
 						if (id == null || (id != null && id.equals(""))) {
@@ -398,6 +410,94 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		}
 	}
 
+	private void showLikeUser(ArrayList<Like> likes) {
+		LinearLayout llLikeUsers = (LinearLayout)findViewById(R.id.ll_like_users);
+		if (likes.size() == 0) {
+			llLikeUsers.setVisibility(View.GONE);
+			return;
+		}
+		
+		llLikeUsers.removeAllViews();
+		llLikeUsers.setVisibility(View.VISIBLE);
+		
+		int width = getResources().getDimensionPixelSize(R.dimen.profile_width);
+		int height = getResources().getDimensionPixelSize(R.dimen.profile_height);
+		int margin = getResources().getDimensionPixelSize(R.dimen.profile_margin);
+		int round = getResources().getDimensionPixelSize(R.dimen.profile_round);
+		
+		ImageLoader imageLoader = ImageLoader.getInstance();
+		DisplayImageOptions options = new DisplayImageOptions.Builder()
+			.cacheInMemory()
+			.resetViewBeforeLoading()
+			.showImageForEmptyUri(R.drawable.ic_blank_profile)
+			.showImageOnFail(R.drawable.ic_blank_profile)
+			.showStubImage(R.drawable.ic_blank_profile)
+			.bitmapConfig(Config.RGB_565)
+			.displayer(new RoundedBitmapDisplayer(round))
+			.build();
+
+		// [XXX] 2는 좋아요 아이콘과 +N 정보를 표시하기 위한 영역
+		int max = getResources().getDisplayMetrics().widthPixels / (width + margin) - 2;
+		int length = 0;
+		boolean isOverflow = likes.size() > max ? true : false;		
+		if (isOverflow) {
+			length = max;
+		} else {
+			length = likes.size();
+		}
+		
+		TextView tvLike = new TextView(this);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
+		tvLike.setLayoutParams(params);			
+		tvLike.setTextColor(Color.WHITE);
+		tvLike.setGravity(Gravity.CENTER);
+		tvLike.setTypeface(null, Typeface.BOLD);
+		tvLike.setBackgroundResource(R.drawable.circle);
+		tvLike.setTextSize(getResources().getDimensionPixelSize(R.dimen.h6));
+		tvLike.setText("\u2764");
+		llLikeUsers.addView(tvLike);
+		
+		for (int i = 0; i < length; i++) {
+			ImageView ivUser = new ImageView(this);
+			params = new LinearLayout.LayoutParams(width, height);
+			params.leftMargin = margin;
+			
+			if (i == length - 1) {
+				params.rightMargin = margin;
+			}
+			
+			ivUser.setLayoutParams(params);
+			ivUser.setScaleType(ScaleType.CENTER_CROP);
+			llLikeUsers.addView(ivUser);
+			
+			Like like = likes.get(i);	
+			imageLoader.displayImage("http://graph.facebook.com/" + like.facebookId + "/picture?type=normal", ivUser, options, new SimpleImageLoadingListener() {
+				@Override
+				public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+					Animation animation = AnimationUtils.loadAnimation(RecipeActivity.this, R.anim.fade_in);
+					view.setAnimation(animation);
+					animation.start();
+				}
+			});
+		}
+		
+		if (isOverflow) {
+			TextView tvMore = new TextView(this);
+			params = new LinearLayout.LayoutParams(width, height);
+			tvMore.setLayoutParams(params);			
+			tvMore.setTextColor(Color.WHITE);
+			tvMore.setGravity(Gravity.CENTER);
+			tvMore.setTypeface(null, Typeface.BOLD);
+			tvMore.setBackgroundResource(R.drawable.round_rect_more);
+			
+			int more = likes.size() - max;
+			tvMore.setText("+" + more);
+			
+			llLikeUsers.addView(tvMore);
+		}
+		
+	}
+	
 	private class CommentsLoader extends AsyncTask {
 		private TextView tvCountComment = (TextView) llHeader.findViewById(R.id.tv_count_comment);
 		private LinearLayout llEmpty = (LinearLayout) llHeader.findViewById(R.id.ll_empty_coments);
@@ -533,6 +633,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 
 			likeList = (ArrayList<Like>) result;
 			tvLike.setText(Integer.toString(likeList.size()));
+			showLikeUser(likeList);
 
 			ImageView ivLike = ((ImageView) ivLikeWrapper.getChildAt(0));
 			if (likeList.size() > 0 && facebookHelper.getId() != null) {

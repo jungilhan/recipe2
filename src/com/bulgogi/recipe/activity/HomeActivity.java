@@ -295,11 +295,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			Log.d(TAG, counts.toString());
 
 			for (Count count : counts) {
-				// [TODO] 서버에서 좋아요 혹은 댓글을 작성했다가 취소할 때 동일한 PostID로 값이 두번오는 버그로
-				// 클라이언트에서 예외처리 함
-				if (!countMap.containsKey(count.postId)) {
-					countMap.put(count.postId, count);
-				}
+				countMap.put(count.postId, count);
 			}
 
 			updateCountInfo();
