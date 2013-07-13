@@ -15,5 +15,6 @@ public class Constants {
 	
 	public static class Extra {
 		public static final String POST = "com.bulgogi.recipe.extra.POST";
+		public static final String LIKE_USERS = "com.bulgogi.recipe.extra.LIKE_USERS";
 	}
 }

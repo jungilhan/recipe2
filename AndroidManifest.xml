@@ -38,8 +38,7 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity 
-            android:name=".activity.LoginActivity"
-            android:theme="@style/Theme.Sherlock.NoActionBar"
+            android:name=".activity.LikeUserActivity"
             android:screenOrientation="portrait" >
         </activity>
         <activity

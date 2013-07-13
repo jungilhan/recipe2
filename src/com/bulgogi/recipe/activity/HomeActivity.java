@@ -73,8 +73,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		facebookHelper = new FacebookHelper(this, savedInstanceState, this);
 
 		setupViews();
-		requestRecipe(Constants.QUERY_COUNT, true);
 		requestCountInfo();
+		requestRecipe(Constants.QUERY_COUNT, true);
 
 		localyticsSession = new LocalyticsSession(this);
 		localyticsSession.open();
@@ -98,8 +98,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 					new PullToRefreshAttacher.OnRefreshListener() {
 						@Override
 						public void onRefreshStarted(View view) {
-							requestRecipe(Constants.QUERY_COUNT, false);
 							requestCountInfo();
+							requestRecipe(Constants.QUERY_COUNT, false);							
 						}
 					});
 		}
@@ -347,8 +347,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			}
 			break;
 		case R.id.action_refresh:
-			requestRecipe(Constants.QUERY_COUNT, true);
 			requestCountInfo();
+			requestRecipe(Constants.QUERY_COUNT, true);			
 			break;
 		}
 		return super.onOptionsItemSelected(item);

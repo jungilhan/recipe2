@@ -1,6 +1,7 @@
 package com.bulgogi.recipe.activity;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -87,6 +88,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	private FacebookHelper facebookHelper;
 	private InputMethodManager inputMethodManager;
 	private LinearLayout ivLikeWrapper;
+	private LinearLayout llLikeUsers;
 	private boolean isLoading = false;
 	private int postId;
 
@@ -272,6 +274,9 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 				}
 			});
 		}
+		
+		llLikeUsers = (LinearLayout)findViewById(R.id.ll_like_users);
+		llLikeUsers.setOnClickListener(this);
 	}
 
 	private void requestComments(int postId) {
@@ -372,6 +377,11 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			sb.append(v.getTag());
 			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sb.toString())));
 			break;
+		case R.id.ll_like_users:
+			Intent intent = new Intent(this, LikeUserActivity.class);
+			intent.putExtra(Extra.LIKE_USERS, (Serializable) likeList);
+			startActivity(intent);
+			break;
 		}
 	}
 
@@ -411,7 +421,6 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	}
 
 	private void showLikeUser(ArrayList<Like> likes) {
-		LinearLayout llLikeUsers = (LinearLayout)findViewById(R.id.ll_like_users);
 		if (likes.size() == 0) {
 			llLikeUsers.setVisibility(View.GONE);
 			return;
@@ -428,6 +437,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		ImageLoader imageLoader = ImageLoader.getInstance();
 		DisplayImageOptions options = new DisplayImageOptions.Builder()
 			.cacheInMemory()
+			.cacheOnDisc()
 			.resetViewBeforeLoading()
 			.showImageForEmptyUri(R.drawable.ic_blank_profile)
 			.showImageOnFail(R.drawable.ic_blank_profile)

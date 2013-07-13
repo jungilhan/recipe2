@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">야간매점 레시피</string>
+    <string name="like_user_title">이 레시피를 좋아해요!</string>
     <string name="episode_postfix">호</string>
     <string name="action_settings">설정</string>
     <string name="action_refresh">새로고침</string>
