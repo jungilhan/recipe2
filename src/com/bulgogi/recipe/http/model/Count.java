@@ -11,14 +11,14 @@ public class Count {
 	@JsonProperty("count")
 	public long count;
 
-	@JsonProperty("like")
-	public long like;
+	@JsonProperty("likes")
+	public long likes;
 	
-	@JsonProperty("comment")
-	public long comment;
+	@JsonProperty("comments")
+	public long comments;
 	
 	@Override
 	public String toString() {
-		return "{ post_id: " + postId + " like: " + like + " comment: " + comment + " }";
+		return "{ post_id: " + postId + " likes: " + likes + " comments: " + comments + " }";
 	}
 }

@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.Options;
 import android.annotation.TargetApi;
@@ -46,8 +43,10 @@ import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.adapter.CommentAdapter;
 import com.bulgogi.recipe.adapter.RecipePagerAdapter;
 import com.bulgogi.recipe.auth.FacebookHelper;
+import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.config.Constants.Extra;
 import com.bulgogi.recipe.http.HttpApi;
+import com.bulgogi.recipe.http.NodeRestApi;
 import com.bulgogi.recipe.http.model.Comment;
 import com.bulgogi.recipe.http.model.Like;
 import com.bulgogi.recipe.http.model.Post;
@@ -57,9 +56,13 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 import com.viewpagerindicator.CirclePageIndicator;
 
-public class RecipeActivity extends SherlockActivity implements OnClickListener, Session.StatusCallback {
+public class RecipeActivity extends SherlockActivity implements
+		OnClickListener, Session.StatusCallback {
 	private static final String TAG = RecipeActivity.class.getSimpleName();
 
 	private PullToRefreshAttacher pullToRefreshAttacher;
@@ -67,97 +70,111 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	private CommentAdapter adapter;
 	private ArrayList<Comment> commentList = new ArrayList<Comment>();
 	private ArrayList<Like> likeList = new ArrayList<Like>();
-	private LinearLayout llHeader;	
+	private LinearLayout llHeader;
 	private FacebookHelper facebookHelper;
 	private InputMethodManager inputMethodManager;
 	private LinearLayout ivLikeWrapper;
 	private boolean isLoading = false;
 	private int postId;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.ac_recipe);
-		
+
 		facebookHelper = new FacebookHelper(this, savedInstanceState, this);
-		inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		
+		inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
 		Intent intent = getIntent();
-		Post post = (Post)intent.getSerializableExtra(Extra.POST);		
+		Post post = (Post) intent.getSerializableExtra(Extra.POST);
 		setupView(post);
-		
+
 		postId = post.id;
 		requestComments(post.id);
 		requestLike(post.id, false);
+		postPageView(postId);
+
+		if (Constants.Config.DEBUG) {
+			Toast.makeText(this, "Post Id: " + postId, Toast.LENGTH_SHORT).show();
+		}
 	}
 
-	private void setupView(final Post post) {		
+	private void setupView(final Post post) {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowHomeEnabled(false);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
 		getSupportActionBar().setTitle(post.title);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		
-		LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		llHeader = (LinearLayout)inflater.inflate(R.layout.ll_recipe_header, null);
-		
-		final ViewPager pager = (ViewPager)llHeader.findViewById(R.id.pager);
+
+		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		llHeader = (LinearLayout) inflater.inflate(R.layout.ll_recipe_header,
+				null);
+
+		final ViewPager pager = (ViewPager) llHeader.findViewById(R.id.pager);
 		pager.setAdapter(new RecipePagerAdapter(this, post.getRecipes()));
 		pager.setOnTouchListener(new View.OnTouchListener() {
 			@Override
-	        public boolean onTouch(View v, MotionEvent event) {
-	            v.getParent().requestDisallowInterceptTouchEvent(true);
-	            return false;
-	        }
-	    });
+			public boolean onTouch(View v, MotionEvent event) {
+				v.getParent().requestDisallowInterceptTouchEvent(true);
+				return false;
+			}
+		});
 
-	    pager.setOnPageChangeListener(new OnPageChangeListener() {
+		pager.setOnPageChangeListener(new OnPageChangeListener() {
 			@Override
-			public void onPageSelected(int arg0) {}
-			
+			public void onPageSelected(int arg0) {
+			}
+
 			@Override
-			public void onPageScrollStateChanged(int arg0) {}
-			
+			public void onPageScrollStateChanged(int arg0) {
+			}
+
 			@Override
 			public void onPageScrolled(int arg0, float arg1, int arg2) {
-			   pager.getParent().requestDisallowInterceptTouchEvent(true);
+				pager.getParent().requestDisallowInterceptTouchEvent(true);
 			}
-	    });
-	    
-		CirclePageIndicator indicator = (CirclePageIndicator)llHeader.findViewById(R.id.indicator);
+		});
+
+		CirclePageIndicator indicator = (CirclePageIndicator) llHeader
+				.findViewById(R.id.indicator);
 		indicator.setViewPager(pager);
-		
-		TextView tvIngredients = (TextView)llHeader.findViewById(R.id.tv_ingredients);
+
+		TextView tvIngredients = (TextView) llHeader
+				.findViewById(R.id.tv_ingredients);
 		String ingredients = post.tags.get(0).ingredients();
 		ingredients = ingredients.replaceAll("\\$", ", ");
 		tvIngredients.setText(ingredients);
 
 		String contents = post.content.replaceAll("\\<.*?\\>", "");
-		TextView tvDirections = (TextView)llHeader.findViewById(R.id.tv_directions);
-		contents = contents.substring(contents.indexOf("1."), contents.length());
+		TextView tvDirections = (TextView) llHeader
+				.findViewById(R.id.tv_directions);
+		contents = contents
+				.substring(contents.indexOf("1."), contents.length());
 		String[] directions = contents.split("[1-9]\\.\\s");
 		String direction = new String();
 		for (int i = 1; i < directions.length; i++) {
-			direction += "<span><b>" + i +". " + "</b>" + directions[i].trim() + "</span>";
+			direction += "<span><b>" + i + ". " + "</b>" + directions[i].trim()
+					+ "</span>";
 			if (i != directions.length - 1) {
 				direction += "<br/><br/>";
 			}
 		}
 		tvDirections.setText(Html.fromHtml(direction));
-		
-		ImageView ivYoutube = (ImageView)llHeader.findViewById(R.id.iv_youtube);
+
+		ImageView ivYoutube = (ImageView) llHeader
+				.findViewById(R.id.iv_youtube);
 		ivYoutube.setOnClickListener(this);
 		String youtubeId = post.tags.get(0).youtubeId();
 		ivYoutube.setTag(youtubeId);
 		if (youtubeId.equals("null")) {
-			ivYoutube.setVisibility(View.INVISIBLE);	
+			ivYoutube.setVisibility(View.INVISIBLE);
 		} else {
 			ivYoutube.setVisibility(View.VISIBLE);
 		}
 
-		final EditText etComment = (EditText)findViewById(R.id.et_comment);
-		
-		ivLikeWrapper = (LinearLayout)findViewById(R.id.ll_like_wrapper);
+		final EditText etComment = (EditText) findViewById(R.id.et_comment);
+
+		ivLikeWrapper = (LinearLayout) findViewById(R.id.ll_like_wrapper);
 		ivLikeWrapper.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -165,32 +182,36 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 					showLoginDialog();
 				} else {
 					ivLikeWrapper.setVisibility(View.GONE);
-					
+
 					final int postId = post.id;
-					final String id = facebookHelper.getId();
-					
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							HttpApi httpApi = new HttpApi();
-							List<NameValuePair> params = new ArrayList<NameValuePair>();
-							params.add(new BasicNameValuePair("post_id", Integer.toString(post.id)));
-							params.add(new BasicNameValuePair("fb_id", id));
-							
-							if (isAlreadyLike(Long.parseLong(id))) {
-								httpApi.post("http://14.63.219.181:3000/unlike", params);	
-							} else {
-								httpApi.post("http://14.63.219.181:3000/like", params);
-							}
-							
-							requestLike(postId, true);
-						}
-					}).start();
+					String id = facebookHelper.getId();
+					HttpApi httpApi = new HttpApi();
+					RequestParams params = new RequestParams();
+					params.put("post_id", Integer.toString(post.id));
+					params.put("fb_id", id);
+
+					if (isAlreadyLike(Long.parseLong(id))) {
+						httpApi.post(NodeRestApi.getPostUnLikeUrl(), params,
+								new AsyncHttpResponseHandler() {
+									@Override
+									public void onSuccess(String response) {
+										requestLike(postId, true);
+									}
+								});
+					} else {
+						httpApi.post(NodeRestApi.getPostLikeUrl(), params,
+								new AsyncHttpResponseHandler() {
+									@Override
+									public void onSuccess(String response) {
+										requestLike(postId, true);
+									}
+								});
+					}
 				}
 			}
 		});
-		
-		ImageView ivSend = (ImageView)findViewById(R.id.iv_send);
+
+		ImageView ivSend = (ImageView) findViewById(R.id.iv_send);
 		ivSend.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -199,55 +220,61 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 				} else {
 					if (etComment.getText().length() > 0) {
 						final int postId = post.id;
-						final String id = facebookHelper.getId();
-						final String name = facebookHelper.getName();
-						final String thumbnail = "http://graph.facebook.com/" + id + "/picture?type=small";
-						final String comment = etComment.getText().toString();
+						String id = facebookHelper.getId();
+						String name = facebookHelper.getName();
+						String thumbnail = "http://graph.facebook.com/" + id
+								+ "/picture?type=small";
+						String comment = etComment.getText().toString();
 
 						if (id == null || (id != null && id.equals(""))) {
-							Toast.makeText(RecipeActivity.this, getResources().getString(R.string.comment_send_error), Toast.LENGTH_LONG).show();
+							Toast.makeText(
+									RecipeActivity.this,
+									getResources().getString(
+											R.string.comment_send_error),
+									Toast.LENGTH_LONG).show();
 							return;
 						}
-						
-						new Thread(new Runnable() {
-							@Override
-							public void run() {
-								HttpApi httpApi = new HttpApi();
-								List<NameValuePair> params = new ArrayList<NameValuePair>();
-								params.add(new BasicNameValuePair("post_id", Integer.toString(postId)));
-								params.add(new BasicNameValuePair("fb_id", id));
-								params.add(new BasicNameValuePair("user_name", name));
-								params.add(new BasicNameValuePair("thumb_url", thumbnail));
-								params.add(new BasicNameValuePair("comment", comment));
-								httpApi.post("http://14.63.219.181:3000/comment/write", params);
-								
-								requestComments(postId);
-							}
-						}).start();
-						
+
+						HttpApi httpApi = new HttpApi();
+						RequestParams params = new RequestParams();
+						params.put("post_id", Integer.toString(postId));
+						params.put("fb_id", id);
+						params.put("user_name", name);
+						params.put("thumb_url", thumbnail);
+						params.put("comment", comment);
+						httpApi.post(NodeRestApi.getPostCommentUrl(), params,
+								new AsyncHttpResponseHandler() {
+									@Override
+									public void onSuccess(String response) {
+										requestComments(postId);
+									}
+								});
+
 						etComment.setText("");
-						inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);						
+						inputMethodManager.hideSoftInputFromWindow(
+								v.getWindowToken(), 0);
 					}
 				}
 			}
 		});
-		
+
 		adapter = new CommentAdapter(this, commentList);
-		lvComments = (ListView)findViewById(R.id.lv_comments);
-		lvComments.addHeaderView(llHeader);		
+		lvComments = (ListView) findViewById(R.id.lv_comments);
+		lvComments.addHeaderView(llHeader);
 		lvComments.setAdapter(adapter);
-		
+
 		Options options = new Options();
-		options.refreshScrollDistance = 0.4f;		
+		options.refreshScrollDistance = 0.4f;
 		pullToRefreshAttacher = new PullToRefreshAttacher(this, options);
 		if (android.os.Build.VERSION.SDK_INT >= 14) {
-			pullToRefreshAttacher.setRefreshableView(lvComments, new PullToRefreshAttacher.OnRefreshListener() {
-				@Override
-				public void onRefreshStarted(View view) {
-					requestComments(post.id);
-					requestLike(post.id, false);
-				}
-			});
+			pullToRefreshAttacher.setRefreshableView(lvComments,
+					new PullToRefreshAttacher.OnRefreshListener() {
+						@Override
+						public void onRefreshStarted(View view) {
+							requestComments(post.id);
+							requestLike(post.id, false);
+						}
+					});
 		}
 	}
 
@@ -257,68 +284,74 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		} else {
 			isLoading = true;
 		}
-		
-		new CommentsLoader().execute("http://14.63.219.181:3000/comment/load/" + postId);
+
+		new CommentsLoader().execute(NodeRestApi.getCommentsUrl(postId));
 	}
-	
+
 	private void requestLike(int postId, boolean showToast) {
-		new LikeLoader().execute("http://14.63.219.181:3000/like/" + postId, showToast);
+		new LikeLoader()
+				.execute(NodeRestApi.getLikeUsersUrl(postId), showToast);
 	}
-	
+
+	private void postPageView(int postId) {
+		AsyncHttpClient client = new AsyncHttpClient();
+		client.get(NodeRestApi.getPostPageViewUrl(postId), null);
+	}
+
 	private boolean isAlreadyLike(long facebookId) {
 		Iterator<Like> iter = likeList.iterator();
 		while (iter.hasNext()) {
-			if (((Like)iter.next()).facebookId == facebookId) {
+			if (((Like) iter.next()).facebookId == facebookId) {
 				return true;
 			}
-		}			
+		}
 		return false;
 	}
-	
-    @Override
-    public void onStart() {
-        super.onStart();
-        facebookHelper.addSessionStatusCallback(this);
-    }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        facebookHelper.removeSessionStatusCallback(this);
-    }
+	@Override
+	public void onStart() {
+		super.onStart();
+		facebookHelper.addSessionStatusCallback(this);
+	}
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        facebookHelper.onActivityResult(this, requestCode, resultCode, data);
-    }
+	@Override
+	public void onStop() {
+		super.onStop();
+		facebookHelper.removeSessionStatusCallback(this);
+	}
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        facebookHelper.saveSession(outState);
-    }
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		facebookHelper.onActivityResult(this, requestCode, resultCode, data);
+	}
 
-    @Override
-    protected void onPause() {
-    	super.onPause();
-    	
-    	if (android.os.Build.VERSION.SDK_INT >= 14) {
-    		pullToRefreshAttacher.setRefreshComplete();
-    	}
-    }
-    
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		facebookHelper.saveSession(outState);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		if (android.os.Build.VERSION.SDK_INT >= 14) {
+			pullToRefreshAttacher.setRefreshComplete();
+		}
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.recipe, menu);
-		
+
 		if (android.os.Build.VERSION.SDK_INT >= 14) {
 			MenuItem refresh = menu.findItem(R.id.action_refresh);
 			refresh.setVisible(false);
 		}
-		return true;		
+		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -327,12 +360,12 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			return true;
 		case R.id.action_refresh:
 			findViewById(R.id.pb_main_loading).setVisibility(View.VISIBLE);
-			
+
 			requestComments(postId);
 			requestLike(postId, false);
-        	break;			
+			break;
 		}
-		
+
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -340,82 +373,92 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.iv_youtube:
-			StringBuilder sb = new StringBuilder("vnd.youtube:"); 
+			StringBuilder sb = new StringBuilder("vnd.youtube:");
 			sb.append(v.getTag());
-			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sb.toString())));
+			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sb
+					.toString())));
 			break;
 		}
 	}
-	
+
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void showLoginDialog() {
-		AlertDialog.Builder builder;		
+		AlertDialog.Builder builder;
 		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
-			builder = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT);
+			builder = new AlertDialog.Builder(this,
+					AlertDialog.THEME_HOLO_LIGHT);
 		} else {
 			builder = new AlertDialog.Builder(this);
 		}
-		
+
 		builder.setMessage(R.string.login_guide);
-		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface arg0, int arg1) {
-	        	if (!facebookHelper.isLogin()) {
-	        		facebookHelper.login();
-	        	} 
-			}
-		});
-		
-		builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface arg0, int arg1) {}
-		});
-		
+		builder.setPositiveButton(R.string.ok,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						if (!facebookHelper.isLogin()) {
+							facebookHelper.login();
+						}
+					}
+				});
+
+		builder.setNegativeButton(R.string.cancel,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+					}
+				});
+
 		builder.show();
 	}
 
 	@Override
 	public void call(Session session, SessionState state, Exception exception) {
 		if (session != null && session.isOpened()) {
-    		facebookHelper.makeMeRequest(session);
-    	}		
+			facebookHelper.makeMeRequest(session);
+		}
 	}
-	
-	private class CommentsLoader extends AsyncTask {				
-		private TextView tvCountComment = (TextView)llHeader.findViewById(R.id.tv_count_comment);
-		private LinearLayout llEmpty = (LinearLayout)llHeader.findViewById(R.id.ll_empty_coments);
-		private LinearLayout llLoadingMsg = (LinearLayout)llHeader.findViewById(R.id.ll_loading_msg);
-		private TextView tvLoadingMsg = (TextView)llLoadingMsg.getChildAt(1);				
-		
+
+	private class CommentsLoader extends AsyncTask {
+		private TextView tvCountComment = (TextView) llHeader
+				.findViewById(R.id.tv_count_comment);
+		private LinearLayout llEmpty = (LinearLayout) llHeader
+				.findViewById(R.id.ll_empty_coments);
+		private LinearLayout llLoadingMsg = (LinearLayout) llHeader
+				.findViewById(R.id.ll_loading_msg);
+		private TextView tvLoadingMsg = (TextView) llLoadingMsg.getChildAt(1);
+
 		@Override
 		protected Object doInBackground(Object... params) {
 			ObjectMapper mapper = new ObjectMapper();
 			ArrayList<Comment> comments = null;
-			
+
 			try {
-				comments = mapper.readValue(new URL((String)params[0]), new TypeReference<List<Comment>>(){});
+				comments = mapper.readValue(new URL((String) params[0]),
+						new TypeReference<List<Comment>>() {
+						});
 			} catch (JsonGenerationException e) {
 				e.printStackTrace();
 			} catch (JsonMappingException e) {
-				e.printStackTrace();				
-			} catch (UnknownHostException e) { 				
+				e.printStackTrace();
+			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-						
+
 			return comments;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Object result) {
 			if (android.os.Build.VERSION.SDK_INT >= 14) {
 				pullToRefreshAttacher.setRefreshComplete();
 			}
-				
+
 			isLoading = false;
 			findViewById(R.id.pb_main_loading).setVisibility(View.GONE);
-			
+
 			if (result == null) {
 				llLoadingMsg.setVisibility(View.VISIBLE);
 				tvLoadingMsg.setText(R.string.loading_error);
@@ -424,19 +467,19 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 				llLoadingMsg.setVisibility(View.GONE);
 				tvLoadingMsg.setText(R.string.loading_comments);
 			}
-			
-			ArrayList<Comment> comments = (ArrayList<Comment>)result;
+
+			ArrayList<Comment> comments = (ArrayList<Comment>) result;
 			Log.d(TAG, comments.toString());
-								
-			int length = comments.size(); 
+
+			int length = comments.size();
 			if (length == 0) {
 				llEmpty.setVisibility(View.VISIBLE);
 			} else {
 				llEmpty.setVisibility(View.GONE);
 			}
-			
+
 			for (int i = 0; i < length; i++) {
-				Comment comment = (Comment)comments.get(i);
+				Comment comment = (Comment) comments.get(i);
 				if (!contains(comment)) {
 					commentList.add(comment);
 				}
@@ -445,84 +488,90 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			tvCountComment.setText(Integer.toString(length));
 			adapter.notifyDataSetChanged();
 		}
-		
+
 		private boolean contains(Comment comment) {
 			Iterator<Comment> iter = commentList.iterator();
 			while (iter.hasNext()) {
-				if (((Comment)iter.next()).commentId == comment.commentId) {
+				if (((Comment) iter.next()).commentId == comment.commentId) {
 					return true;
 				}
-			}			
+			}
 			return false;
 		}
 	}
-	
-	private class LikeLoader extends AsyncTask {				
-		private TextView tvLike = (TextView)llHeader.findViewById(R.id.tv_count_like);
-		private ProgressBar pbLike = (ProgressBar)findViewById(R.id.pb_like);
+
+	private class LikeLoader extends AsyncTask {
+		private TextView tvLike = (TextView) llHeader
+				.findViewById(R.id.tv_count_like);
+		private ProgressBar pbLike = (ProgressBar) findViewById(R.id.pb_like);
 		private Boolean showToast = false;
-		
+
 		@Override
 		protected Object doInBackground(Object... params) {
 			ObjectMapper mapper = new ObjectMapper();
 			ArrayList<Like> likes = new ArrayList<Like>();
-			showToast = (Boolean)params[1]; 
-					
+			showToast = (Boolean) params[1];
+
 			try {
-				likes = mapper.readValue(new URL((String)params[0]), new TypeReference<List<Like>>(){});
+				likes = mapper.readValue(new URL((String) params[0]),
+						new TypeReference<List<Like>>() {
+						});
 			} catch (JsonGenerationException e) {
 				e.printStackTrace();
 			} catch (JsonMappingException e) {
-				e.printStackTrace();				
-			} catch (UnknownHostException e) { 				
+				e.printStackTrace();
+			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-						
+
 			return likes;
 		}
-		
+
 		@Override
-        protected void onPreExecute() {
+		protected void onPreExecute() {
 			super.onPreExecute();
-			
+
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					pbLike.setVisibility(View.VISIBLE);
 				}
-			});			
+			});
 		}
-		
+
 		@Override
 		protected void onPostExecute(Object result) {
 			ivLikeWrapper.setVisibility(View.VISIBLE);
 			pbLike.setVisibility(View.GONE);
-			
-			likeList = (ArrayList<Like>)result;
+
+			likeList = (ArrayList<Like>) result;
 			tvLike.setText(Integer.toString(likeList.size()));
-			
-			ImageView ivLike = ((ImageView)ivLikeWrapper.getChildAt(0));
+
+			ImageView ivLike = ((ImageView) ivLikeWrapper.getChildAt(0));
 			if (likeList.size() > 0 && facebookHelper.getId() != null) {
 				if (isAlreadyLike(Long.parseLong(facebookHelper.getId()))) {
 					if (showToast) {
-						Toast.makeText(RecipeActivity.this, R.string.like_msg, Toast.LENGTH_SHORT).show();
+						Toast.makeText(RecipeActivity.this, R.string.like_msg,
+								Toast.LENGTH_SHORT).show();
 					}
 					ivLike.setImageResource(R.drawable.btn_unlike);
-					
+
 				} else {
 					if (showToast) {
-						Toast.makeText(RecipeActivity.this, R.string.unlike_msg, Toast.LENGTH_SHORT).show();
+						Toast.makeText(RecipeActivity.this,
+								R.string.unlike_msg, Toast.LENGTH_SHORT).show();
 					}
 					ivLike.setImageResource(R.drawable.btn_like);
 				}
 			} else {
 				if (showToast) {
-					Toast.makeText(RecipeActivity.this, R.string.unlike_msg, Toast.LENGTH_SHORT).show();
+					Toast.makeText(RecipeActivity.this, R.string.unlike_msg,
+							Toast.LENGTH_SHORT).show();
 				}
 				ivLike.setImageResource(R.drawable.btn_like);
 			}
-		}		
+		}
 	}
 }

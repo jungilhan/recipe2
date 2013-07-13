@@ -54,7 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
-                android:textSize="15sp"
+                android:textSize="@dimen/h3"
                 android:textColor="#666"
                 android:text="--"/>
             <ImageView
@@ -67,7 +67,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
-                android:textSize="15sp"
+                android:textSize="@dimen/h3"
                 android:textColor="#666"
                 android:text="--"/>
         </LinearLayout>
@@ -101,7 +101,7 @@
 		        android:layout_height="wrap_content"
 		        android:layout_marginLeft="10dp"
 		        android:layout_gravity="center_vertical"
-		        android:textSize="16sp"
+		        android:textSize="@dimen/h2"
 		        android:textColor="#e44f37"
 		        android:textStyle="bold"
 		        android:text="@string/ingredients" />
@@ -114,7 +114,7 @@
 	        android:layout_alignLeft="@id/ll_ingredients_header"
 	        android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
-	        android:textSize="15sp"
+	        android:textSize="@dimen/h3"
 	        android:textColor="#666" />
 	</RelativeLayout>
 	
@@ -146,7 +146,7 @@
 	            android:layout_height="wrap_content"
 	            android:layout_marginLeft="10dp"
 	            android:layout_gravity="center_vertical"
-	            android:textSize="16sp"
+	            android:textSize="@dimen/h2"
 	            android:textColor="#e44f37"
 	            android:textStyle="bold"
 	            android:text="@string/directions" />
@@ -160,7 +160,7 @@
             android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
             android:paddingBottom="10dp"
-            android:textSize="15sp"
+            android:textSize="@dimen/h3"
             android:textColor="#666" />
     </RelativeLayout>  
     
@@ -183,7 +183,7 @@
 	        android:gravity="center_horizontal"
 	        android:text="@string/empty_comments"
 	        android:textColor="#666"
-	        android:textSize="15sp" />
+	        android:textSize="@dimen/h3" />
 	</LinearLayout>
 	
     <LinearLayout
@@ -205,6 +205,6 @@
             android:gravity="center_horizontal"
             android:text="@string/loading_comments"
             android:textColor="#666"
-            android:textSize="15sp" />
+            android:textSize="@dimen/h3" />
     </LinearLayout>
 </LinearLayout>
