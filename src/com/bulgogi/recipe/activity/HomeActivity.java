@@ -300,9 +300,9 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 
 			updateCountInfo();
 
-			if (thumbnails.size() > 0) {
-				adapter.notifyDataSetChanged();
-			}
+			//if (thumbnails.size() > 0) {
+				//adapter.notifyDataSetChanged();
+			//}
 		}
 	}
 
@@ -394,6 +394,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	}
 
 	public void onRefreshClicked(View v) {
+		requestCountInfo();
 		requestRecipe(Constants.QUERY_COUNT, true);
 	}
 }
