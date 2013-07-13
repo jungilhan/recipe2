@@ -53,321 +53,326 @@ import com.localytics.android.LocalyticsSession;
 
 public class HomeActivity extends SherlockActivity implements Session.StatusCallback {
 	private static final String TAG = HomeActivity.class.getSimpleName();
-	
+
 	private LocalyticsSession localyticsSession;
-	
+
 	private ArrayList<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
 	private HashMap<Integer, Count> countMap = new HashMap<Integer, Count>();
 	private GridView gvThumbnail;
 	private ThumbnailAdapter adapter;
-	private PullToRefreshAttacher pullToRefreshAttacher;	
+	private PullToRefreshAttacher pullToRefreshAttacher;
 	private FacebookHelper facebookHelper;
 	private MenuItem actionbarLogin;
 	private boolean isLoading = false;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.ac_home);
-		
-		facebookHelper = new FacebookHelper(this, savedInstanceState, this);		
-	    
+
+		facebookHelper = new FacebookHelper(this, savedInstanceState, this);
+
 		setupViews();
 		requestRecipe(Constants.QUERY_COUNT, true);
 		requestCountInfo();
-		
+
 		localyticsSession = new LocalyticsSession(this);
 		localyticsSession.open();
 		localyticsSession.upload();
 	}
-    
+
 	private void setupViews() {
 		getSupportActionBar().setIcon(R.drawable.abs_icon);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		
+
 		adapter = new ThumbnailAdapter(this, thumbnails);
-		gvThumbnail = (GridView)findViewById(R.id.sgv_thumbnail);
-		
+		gvThumbnail = (GridView) findViewById(R.id.sgv_thumbnail);
+
 		int columns = RecipeApplication.isTablet() == true ? Constants.GRIDVIEW_TABLET_COLUMNS : Constants.GRIDVIEW_DEFAULT_COLUMNS;
 		gvThumbnail.setNumColumns(columns);
 		gvThumbnail.setAdapter(adapter);
-		
+
 		pullToRefreshAttacher = new PullToRefreshAttacher(this);
 		if (android.os.Build.VERSION.SDK_INT >= 14) {
-			pullToRefreshAttacher.setRefreshableView(gvThumbnail, (PullToRefreshAttacher.ViewDelegate)new ScrollViewDelegate(), 
+			pullToRefreshAttacher.setRefreshableView(gvThumbnail, (PullToRefreshAttacher.ViewDelegate) new ScrollViewDelegate(),
 					new PullToRefreshAttacher.OnRefreshListener() {
-				@Override
-				public void onRefreshStarted(View view) {
-					requestRecipe(Constants.QUERY_COUNT, false);
-					requestCountInfo();
-				}
-			});
+						@Override
+						public void onRefreshStarted(View view) {
+							requestRecipe(Constants.QUERY_COUNT, false);
+							requestCountInfo();
+						}
+					});
 		}
 	}
-	
-    @Override
-    public void onStart() {
-        super.onStart();
-        facebookHelper.addSessionStatusCallback(this);
-    }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        facebookHelper.removeSessionStatusCallback(this);
-    }
+	@Override
+	public void onStart() {
+		super.onStart();
+		facebookHelper.addSessionStatusCallback(this);
+	}
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        facebookHelper.onActivityResult(this, requestCode, resultCode, data);
-    }
+	@Override
+	public void onStop() {
+		super.onStop();
+		facebookHelper.removeSessionStatusCallback(this);
+	}
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        facebookHelper.saveSession(outState);
-    }
-    
-    @Override
-    public void onResume() {
-    	super.onResume();
-    	localyticsSession.open();
-    }
-    
-    @Override
-    protected void onPause() {
-    	localyticsSession.close();
-        localyticsSession.upload();
-    	super.onPause();
-    	
-    	if (android.os.Build.VERSION.SDK_INT >= 14) {
-    		pullToRefreshAttacher.setRefreshComplete();
-    	}
-    }
-    
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		facebookHelper.onActivityResult(this, requestCode, resultCode, data);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		facebookHelper.saveSession(outState);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		localyticsSession.open();
+	}
+
+	@Override
+	protected void onPause() {
+		localyticsSession.close();
+		localyticsSession.upload();
+		super.onPause();
+
+		if (android.os.Build.VERSION.SDK_INT >= 14) {
+			pullToRefreshAttacher.setRefreshComplete();
+		}
+	}
+
 	private void requestRecipe(int count, boolean showProgressBar) {
 		if (isLoading) {
 			return;
 		} else {
 			isLoading = true;
 		}
-		
+
 		findViewById(R.id.pb_main_loading).setVisibility(showProgressBar == true ? View.VISIBLE : View.GONE);
-    	new RecipeLoader().execute(WPRestApi.getPostsUrl(count, false), showProgressBar);
-    }
-	
+		new RecipeLoader().execute(WPRestApi.getPostsUrl(count, false), showProgressBar);
+	}
+
 	private void requestCountInfo() {
 		new CountInfoLoader().execute(NodeRestApi.getCountInfoUrl());
 	}
-	
+
 	private class RecipeLoader extends AsyncTask {
-		private LinearLayout llError = (LinearLayout)findViewById(R.id.ll_error);
-		private ProgressBar pbLoading = (ProgressBar)findViewById(R.id.pb_main_loading);
-		
+		private LinearLayout llError = (LinearLayout) findViewById(R.id.ll_error);
+		private ProgressBar pbLoading = (ProgressBar) findViewById(R.id.pb_main_loading);
+
 		@Override
 		protected Object doInBackground(Object... params) {
 			ObjectMapper mapper = new ObjectMapper();
 			Posts posts = null;
-			
+
 			try {
-				posts = mapper.readValue(new URL((String)params[0]), Posts.class);
+				posts = mapper.readValue(new URL((String) params[0]), Posts.class);
 			} catch (JsonGenerationException e) {
 				e.printStackTrace();
 			} catch (JsonMappingException e) {
-				e.printStackTrace();				
-			} catch (UnknownHostException e) { 				
+				e.printStackTrace();
+			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-						
+
 			return posts;
 		}
-		
+
 		@Override
-        protected void onPreExecute() {
+		protected void onPreExecute() {
 			super.onPreExecute();
-			
+
 			llError.setVisibility(View.GONE);
 		}
-		
+
 		@Override
 		protected void onPostExecute(Object result) {
 			if (android.os.Build.VERSION.SDK_INT >= 14) {
 				pullToRefreshAttacher.setRefreshComplete();
 			}
-			
+
 			isLoading = false;
-			
+
 			if (pbLoading.getVisibility() == View.VISIBLE) {
-				pbLoading.setVisibility(View.GONE);	
+				pbLoading.setVisibility(View.GONE);
 			}
-			
+
 			if (result == null) {
 				llError.setVisibility(View.VISIBLE);
 				return;
 			} else {
 				llError.setVisibility(View.GONE);
-				gvThumbnail.setVisibility(View.VISIBLE);	
-			}			
+				gvThumbnail.setVisibility(View.VISIBLE);
+			}
 
-			Posts posts = (Posts)result;
-			//Log.d(TAG, posts.toString());
-			
+			Posts posts = (Posts) result;
+			// Log.d(TAG, posts.toString());
+
 			for (int i = 0; i < posts.posts.size(); i++) {
 				Post post = posts.posts.get(i);
 				Thumbnail thumbnail = new Thumbnail(post);
 				if (contains(post)) {
-					remove(post);					
+					remove(post);
 				}
-				
+
 				thumbnails.add(thumbnail);
 			}
-			
+
 			Collections.sort(thumbnails, new Comparator<Thumbnail>() {
 				public int compare(Thumbnail s1, Thumbnail s2) {
-					if (s1.getId() > s2.getId()) return -1;
-					else if (s1.getId() > s2.getId()) return 1;
-					else return 0;
+					if (s1.getId() > s2.getId())
+						return -1;
+					else if (s1.getId() > s2.getId())
+						return 1;
+					else
+						return 0;
 				}
 			});
-			
+
 			updateCountInfo();
-			
+
 			adapter.notifyDataSetChanged();
 		}
-		
+
 		private void remove(Post post) {
 			Iterator<Thumbnail> iter = thumbnails.iterator();
 			while (iter.hasNext()) {
-				Thumbnail thumbnail = (Thumbnail)iter.next(); 
+				Thumbnail thumbnail = (Thumbnail) iter.next();
 				if (thumbnail.getId() == post.id) {
 					thumbnails.remove(thumbnail);
 					return;
 				}
-			}			
+			}
 		}
-		
+
 		private boolean contains(Post post) {
 			Iterator<Thumbnail> iter = thumbnails.iterator();
 			while (iter.hasNext()) {
-				if (((Thumbnail)iter.next()).getId() == post.id) {
+				if (((Thumbnail) iter.next()).getId() == post.id) {
 					return true;
 				}
-			}			
+			}
 			return false;
 		}
 	}
-	
-	private class CountInfoLoader extends AsyncTask {		
+
+	private class CountInfoLoader extends AsyncTask {
 		@Override
 		protected Object doInBackground(Object... params) {
 			ObjectMapper mapper = new ObjectMapper();
 			ArrayList<Count> counts = null;
-			
+
 			try {
-				counts = mapper.readValue(new URL((String)params[0]), new TypeReference<List<Count>>(){});
+				counts = mapper.readValue(new URL((String) params[0]), new TypeReference<List<Count>>() {
+				});
 			} catch (JsonGenerationException e) {
 				e.printStackTrace();
 			} catch (JsonMappingException e) {
-				e.printStackTrace();				
-			} catch (UnknownHostException e) { 				
+				e.printStackTrace();
+			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-						
+
 			return counts;
-		}		
-		
+		}
+
 		@Override
 		protected void onPostExecute(Object result) {
 			if (result == null) {
 				return;
 			}
-			
-			ArrayList<Count> counts = (ArrayList<Count>)result;
+
+			ArrayList<Count> counts = (ArrayList<Count>) result;
 			Log.d(TAG, counts.toString());
-			
+
 			for (Count count : counts) {
-				// [TODO] 서버에서 좋아요 혹은 댓글을 작성했다가 취소할 때 동일한 PostID로 값이 두번오는 버그로 클라이언트에서 예외처리 함
-				if (!countMap.containsKey(count.postId)) { 
-					countMap.put(count.postId, count);	
+				// [TODO] 서버에서 좋아요 혹은 댓글을 작성했다가 취소할 때 동일한 PostID로 값이 두번오는 버그로
+				// 클라이언트에서 예외처리 함
+				if (!countMap.containsKey(count.postId)) {
+					countMap.put(count.postId, count);
 				}
 			}
-			
+
 			updateCountInfo();
-			
+
 			if (thumbnails.size() > 0) {
 				adapter.notifyDataSetChanged();
 			}
 		}
 	}
-	
+
 	private void updateCountInfo() {
 		for (Thumbnail thumbnail : thumbnails) {
 			int postId = thumbnail.getId();
-			Count count = countMap.get(postId);		
+			Count count = countMap.get(postId);
 			if (count != null) {
 				thumbnail.setLikeCount(count.likes);
 				thumbnail.setCommentCount(count.comments);
-			}				
+			}
 		}
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.home, menu);
 		actionbarLogin = menu.findItem(R.id.action_login);
-		
+
 		if (android.os.Build.VERSION.SDK_INT >= 14) {
 			MenuItem refresh = menu.findItem(R.id.action_refresh);
 			refresh.setVisible(false);
 		}
-		return true;		
+		return true;
 	}
-	
+
 	@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.action_settings:
-        	if (facebookHelper.isLogin()) {
-        		actionbarLogin.setTitle(R.string.action_logout);	
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_settings:
+			if (facebookHelper.isLogin()) {
+				actionbarLogin.setTitle(R.string.action_logout);
 			} else {
 				actionbarLogin.setTitle(R.string.action_login);
 			}
-        	break;
-        case R.id.action_login:
-        	if (!facebookHelper.isLogin()) {
-        		facebookHelper.login();
-        	} else {
-        		showLogoutDialog();
-        	}
-        	break;
-        case R.id.action_refresh:
-        	requestRecipe(Constants.QUERY_COUNT, true);
-        	requestCountInfo();
-        	break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+			break;
+		case R.id.action_login:
+			if (!facebookHelper.isLogin()) {
+				facebookHelper.login();
+			} else {
+				showLogoutDialog();
+			}
+			break;
+		case R.id.action_refresh:
+			requestRecipe(Constants.QUERY_COUNT, true);
+			requestCountInfo();
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void showLogoutDialog() {
 		View innerView = getLayoutInflater().inflate(R.layout.rl_logout, null);
-		
+
 		if (facebookHelper.getId() != null) {
-			ProfilePictureView ppvProfile = (ProfilePictureView)innerView.findViewById(R.id.ppv_profile);
+			ProfilePictureView ppvProfile = (ProfilePictureView) innerView.findViewById(R.id.ppv_profile);
 			ppvProfile.setProfileId(facebookHelper.getId());
 		}
-		
+
 		if (facebookHelper.getName() != null) {
-			TextView tvName = (TextView)innerView.findViewById(R.id.tv_name);
+			TextView tvName = (TextView) innerView.findViewById(R.id.tv_name);
 			tvName.setText(facebookHelper.getName());
 		}
-		
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);		
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setView(innerView);
 		builder.setPositiveButton(R.string.ok, new OnClickListener() {
 			@Override
@@ -375,23 +380,24 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				facebookHelper.logout();
 			}
 		});
-		
+
 		builder.setNegativeButton(R.string.cancel, new OnClickListener() {
 			@Override
-			public void onClick(DialogInterface arg0, int arg1) {}
+			public void onClick(DialogInterface arg0, int arg1) {
+			}
 		});
-		
+
 		builder.show();
 	}
 
 	@Override
 	public void call(Session session, SessionState state, Exception exception) {
 		if (session != null && session.isOpened()) {
-    		facebookHelper.makeMeRequest(session);
+			facebookHelper.makeMeRequest(session);
 		}
 	}
-	
-	 public void onRefreshClicked(View v) {
-		 requestRecipe(Constants.QUERY_COUNT, true);
-	 }
+
+	public void onRefreshClicked(View v) {
+		requestRecipe(Constants.QUERY_COUNT, true);
+	}
 }

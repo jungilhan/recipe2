@@ -24,21 +24,20 @@ import com.bulgogi.recipe.http.model.Comment;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
-import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
 public class CommentAdapter extends BaseAdapter {
 	private Context context;
 	private ArrayList<Comment> comments;
 	private ImageLoader imageLoader = ImageLoader.getInstance();
 	private DisplayImageOptions options;
-	
+
 	static class ViewHolder {
 		ImageView ivProfile;
 		TextView tvName;
 		TextView tvComment;
 		TextView tvTimestamp;
 	}
-	
+
 	public CommentAdapter(Context context, ArrayList<Comment> comments) {
 		this.context = context;
 		this.comments = comments;
@@ -48,10 +47,9 @@ public class CommentAdapter extends BaseAdapter {
 		.showImageForEmptyUri(R.drawable.ic_blank_profile)
 		.showImageOnFail(R.drawable.ic_blank_profile)
 		.showStubImage(R.drawable.ic_blank_profile)
-		.bitmapConfig(Config.RGB_565)
-		.build();		
+		.bitmapConfig(Config.RGB_565).build();
 	}
-	
+
 	@Override
 	public int getCount() {
 		return comments.size();
@@ -70,21 +68,21 @@ public class CommentAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
-		
+
 		if (convertView == null) {
 			LayoutInflater inflator = LayoutInflater.from(context);
 			convertView = inflator.inflate(R.layout.rl_comment, null);
-			
+
 			holder = new ViewHolder();
-			holder.ivProfile = (ImageView)convertView.findViewById(R.id.iv_profile);
-			holder.tvName = (TextView)convertView.findViewById(R.id.tv_name);
-			holder.tvComment = (TextView)convertView.findViewById(R.id.tv_comment);
-			holder.tvTimestamp = (TextView)convertView.findViewById(R.id.tv_timestamp);
+			holder.ivProfile = (ImageView) convertView.findViewById(R.id.iv_profile);
+			holder.tvName = (TextView) convertView.findViewById(R.id.tv_name);
+			holder.tvComment = (TextView) convertView.findViewById(R.id.tv_comment);
+			holder.tvTimestamp = (TextView) convertView.findViewById(R.id.tv_timestamp);
 			convertView.setTag(holder);
 		} else {
-			holder = (ViewHolder)convertView.getTag();
+			holder = (ViewHolder) convertView.getTag();
 		}
-		
+
 		Comment comment = comments.get(position);
 		imageLoader.displayImage(comment.thumbnail, holder.ivProfile, options, new SimpleImageLoadingListener() {
 			@Override
@@ -94,10 +92,10 @@ public class CommentAdapter extends BaseAdapter {
 				animation.start();
 			}
 		});
-		
+
 		holder.tvName.setText(comment.name);
 		holder.tvComment.setText(comment.comment);
-		
+
 		try {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.KOREA);
 			Calendar calendar = Calendar.getInstance();

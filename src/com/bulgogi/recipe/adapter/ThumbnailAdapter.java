@@ -69,10 +69,10 @@ public class ThumbnailAdapter extends BaseAdapter {
 		int imageHeight = imageWidth;
 		imageBounds.left = 0;
 		imageBounds.top = 0;
-		imageBounds.right = imageWidth;		
+		imageBounds.right = imageWidth;
 		imageBounds.bottom = imageHeight;
 	}
-	
+
 	@Override
 	public int getCount() {
 		return thumbnails.size();
@@ -92,35 +92,35 @@ public class ThumbnailAdapter extends BaseAdapter {
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		final ViewHolder holder;
 		Thumbnail thumbnail = thumbnails.get(position);
-		
+
 		if (convertView == null) {
 			convertView = inflator.inflate(R.layout.ll_thumbnail, null);
-			
+
 			holder = new ViewHolder();
 			holder.container = convertView.findViewById(R.id.container);
 			holder.pbLoading = convertView.findViewById(R.id.pb_loading);
-			holder.ivThumbnail = (ImageView)convertView.findViewById(R.id.iv_thumbnail);
-			holder.tvEpisode = (TextView)convertView.findViewById(R.id.tv_episode);
-			holder.tvChef = (TextView)convertView.findViewById(R.id.tv_chef);			
-			holder.ivChef = (ImageView)convertView.findViewById(R.id.iv_chef);
-			holder.tvFood = (TextView)convertView.findViewById(R.id.tv_food);
-			holder.tvLikeCount = (TextView)convertView.findViewById(R.id.tv_count_like);
-			holder.tvCommentCount = (TextView)convertView.findViewById(R.id.tv_count_comment);
+			holder.ivThumbnail = (ImageView) convertView.findViewById(R.id.iv_thumbnail);
+			holder.tvEpisode = (TextView) convertView.findViewById(R.id.tv_episode);
+			holder.tvChef = (TextView) convertView.findViewById(R.id.tv_chef);
+			holder.ivChef = (ImageView) convertView.findViewById(R.id.iv_chef);
+			holder.tvFood = (TextView) convertView.findViewById(R.id.tv_food);
+			holder.tvLikeCount = (TextView) convertView.findViewById(R.id.tv_count_like);
+			holder.tvCommentCount = (TextView) convertView.findViewById(R.id.tv_count_comment);
 			convertView.setTag(holder);
 		} else {
-			holder = (ViewHolder)convertView.getTag();
+			holder = (ViewHolder) convertView.getTag();
 		}
-		
+
 		holder.container.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(context, RecipeActivity.class);
-		        Thumbnail thumbnail = thumbnails.get(position);
-		        intent.putExtra(Extra.POST, (Serializable)thumbnail.getPost());
-		        context.startActivity(intent);		        
+				Thumbnail thumbnail = thumbnails.get(position);
+				intent.putExtra(Extra.POST, (Serializable) thumbnail.getPost());
+				context.startActivity(intent);
 			}
 		});
-		
+
 		holder.container.setOnTouchListener(new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -128,44 +128,44 @@ public class ThumbnailAdapter extends BaseAdapter {
 				if (drawable == null) {
 					return false;
 				}
-				
+
 				switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-						drawable.setColorFilter(0x22000000, PorterDuff.Mode.SRC_ATOP);
-						holder.ivThumbnail.invalidate();
-						break;
-					case MotionEvent.ACTION_UP:
-	                case MotionEvent.ACTION_CANCEL:
-	                	drawable.clearColorFilter();
-	                	holder.ivThumbnail.invalidate();
-	                	break;
+				case MotionEvent.ACTION_DOWN:
+					drawable.setColorFilter(0x22000000, PorterDuff.Mode.SRC_ATOP);
+					holder.ivThumbnail.invalidate();
+					break;
+				case MotionEvent.ACTION_UP:
+				case MotionEvent.ACTION_CANCEL:
+					drawable.clearColorFilter();
+					holder.ivThumbnail.invalidate();
+					break;
 				}
 				return false;
 			}
-		});			
-		
+		});
+
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(holder.ivThumbnail.getLayoutParams());
 		lp.width = imageBounds.right - imageBounds.left;
-        lp.width -= position == 0 ? context.getResources().getDimensionPixelSize(R.dimen.sgv_item_padding) : 0;
-        lp.height = imageBounds.bottom - imageBounds.top;
-        holder.ivThumbnail.setLayoutParams(lp);
-        
+		lp.width -= position == 0 ? context.getResources().getDimensionPixelSize(R.dimen.sgv_item_padding) : 0;
+		lp.height = imageBounds.bottom - imageBounds.top;
+		holder.ivThumbnail.setLayoutParams(lp);
+
 		imageLoader.displayImage(thumbnail.getUrl(), holder.ivThumbnail, options, new SimpleImageLoadingListener() {
 			@Override
-			public void onLoadingStarted(String imageUri, View view) {				
+			public void onLoadingStarted(String imageUri, View view) {
 				holder.pbLoading.setVisibility(View.VISIBLE);
 			}
-			
+
 			@Override
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 				holder.pbLoading.setVisibility(View.GONE);
-				
+
 				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
 				view.setAnimation(animation);
 				animation.start();
 			}
 		});
-		
+
 		imageLoader.displayImage(thumbnail.getChefImageUri(), holder.ivChef, options, new SimpleImageLoadingListener() {
 			@Override
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
@@ -173,15 +173,14 @@ public class ThumbnailAdapter extends BaseAdapter {
 				view.setAnimation(animation);
 				animation.start();
 			}
-		});		
+		});
 
 		holder.tvEpisode.setText(thumbnail.getEpisode() + context.getResources().getString(R.string.episode_postfix));
-		holder.tvFood.setText(thumbnail.getFood());		
+		holder.tvFood.setText(thumbnail.getFood());
 		holder.tvChef.setText(thumbnail.getChef());
 		holder.tvLikeCount.setText(Long.toString(thumbnail.getLikeCount()));
 		holder.tvCommentCount.setText(Long.toString(thumbnail.getCommentCount()));
-		
-		return convertView;
-	}	
-}
 
+		return convertView;
+	}
+}

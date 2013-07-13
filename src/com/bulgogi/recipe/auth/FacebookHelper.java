@@ -19,51 +19,51 @@ import com.facebook.model.GraphUser;
 public class FacebookHelper {
 	private Activity activity;
 	private Session.StatusCallback statusCallback;
-	private GraphUser user; 
-	
+	private GraphUser user;
+
 	public FacebookHelper(Activity activity, Bundle savedInstanceState, Session.StatusCallback statusCallback) {
 		this.activity = activity;
 		this.statusCallback = statusCallback;
-		
+
 		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
-        Session session = Session.getActiveSession();
-        if (session == null) {
-            if (savedInstanceState != null) {
-                session = Session.restoreSession(this.activity, null, this.statusCallback, savedInstanceState);
-            }
-            
-            if (session == null) {
-                session = new Session(this.activity);
-            }
-            
-            Session.setActiveSession(session);
-            if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
-                session.openForRead(new Session.OpenRequest(this.activity).setCallback(this.statusCallback));
-            }
-        }
+		Session session = Session.getActiveSession();
+		if (session == null) {
+			if (savedInstanceState != null) {
+				session = Session.restoreSession(this.activity, null, this.statusCallback, savedInstanceState);
+			}
+
+			if (session == null) {
+				session = new Session(this.activity);
+			}
+
+			Session.setActiveSession(session);
+			if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
+				session.openForRead(new Session.OpenRequest(this.activity).setCallback(this.statusCallback));
+			}
+		}
 	}
-	
+
 	public void login() {
 		Session session = Session.getActiveSession();
-        if (!session.isOpened() && !session.isClosed()) {
-            session.openForRead(new Session.OpenRequest(activity).setCallback(statusCallback));
-        } else {
-            Session.openActiveSession(activity, true, this.statusCallback);
-        }
+		if (!session.isOpened() && !session.isClosed()) {
+			session.openForRead(new Session.OpenRequest(activity).setCallback(statusCallback));
+		} else {
+			Session.openActiveSession(activity, true, this.statusCallback);
+		}
 	}
-	
+
 	public void logout() {
 		Session session = Session.getActiveSession();
-        if (!session.isClosed()) {
-            session.closeAndClearTokenInformation();
-            
-            PreferenceHelper.getInstance().putString(Constants.PREF_NAME, null);
+		if (!session.isClosed()) {
+			session.closeAndClearTokenInformation();
+
+			PreferenceHelper.getInstance().putString(Constants.PREF_NAME, null);
 			PreferenceHelper.getInstance().putString(Constants.PREF_FACEBOOK_ID, null);
-			
+
 			Toast.makeText(activity, activity.getResources().getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
-        }
+		}
 	}
-	
+
 	public boolean isLogin() {
 		Session session = Session.getActiveSession();
 		return session.isOpened();
@@ -72,16 +72,16 @@ public class FacebookHelper {
 	public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
 		Session.getActiveSession().onActivityResult(activity, requestCode, resultCode, data);
 	}
-	
+
 	public void saveSession(Bundle outState) {
 		Session session = Session.getActiveSession();
-        Session.saveSession(session, outState);	
+		Session.saveSession(session, outState);
 	}
-	
+
 	public void addSessionStatusCallback(Session.StatusCallback statusCallback) {
-		Session.getActiveSession().addCallback(statusCallback);		
+		Session.getActiveSession().addCallback(statusCallback);
 	}
-	
+
 	public void removeSessionStatusCallback(Session.StatusCallback statusCallback) {
 		Session.getActiveSession().removeCallback(statusCallback);
 	}
@@ -94,7 +94,7 @@ public class FacebookHelper {
 		}
 		return null;
 	}
-	
+
 	public String getName() {
 		if (user != null) {
 			return user.getName();
@@ -103,7 +103,7 @@ public class FacebookHelper {
 		}
 		return null;
 	}
-	
+
 	public void makeMeRequest(final Session session) {
 		Request request = Request.newMeRequest(session, new Request.GraphUserCallback() {
 			@Override
@@ -111,18 +111,18 @@ public class FacebookHelper {
 				if (session == Session.getActiveSession()) {
 					if (graphUser != null) {
 						user = graphUser;
-						
+
 						PreferenceHelper.getInstance().putString(Constants.PREF_NAME, user.getName());
 						PreferenceHelper.getInstance().putString(Constants.PREF_FACEBOOK_ID, user.getId());
 					}
 				}
-				
+
 				if (response.getError() != null) {
-					
+
 				}
 			}
 		});
-		 
-		 request.executeAsync();
+
+		request.executeAsync();
 	}
 }
