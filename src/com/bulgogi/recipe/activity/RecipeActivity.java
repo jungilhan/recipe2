@@ -331,6 +331,10 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		}
 		return false;
 	}
+	
+	public boolean isLoading() {
+		return isLoading;
+	}
 
 	@Override
 	public void onStart() {
