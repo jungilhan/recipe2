@@ -29,10 +29,10 @@ public class LikeUserActivity extends SherlockListActivity {
 		Intent intent = getIntent();
 		ArrayList<Like> likeUsers = (ArrayList<Like>) intent.getSerializableExtra(Extra.LIKE_USERS);
 
-		setupView(likeUsers);
+		setupViews(likeUsers);
 	}
 	
-	private void setupView(ArrayList<Like> likeUsers) {
+	private void setupViews(ArrayList<Like> likeUsers) {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowHomeEnabled(false);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
