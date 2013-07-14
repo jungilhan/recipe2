@@ -467,16 +467,14 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			length = likes.size();
 		}
 		
-		TextView tvLike = new TextView(this);
+		ImageView ivLike = new ImageView(this);
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
-		tvLike.setLayoutParams(params);			
-		tvLike.setTextColor(Color.WHITE);
-		tvLike.setGravity(Gravity.CENTER);
-		tvLike.setTypeface(null, Typeface.BOLD);
-		tvLike.setBackgroundResource(R.drawable.circle);
-		tvLike.setTextSize(getResources().getDimensionPixelSize(R.dimen.h6));
-		tvLike.setText("\u2764");
-		llLikeUsers.addView(tvLike);
+		params.gravity = Gravity.CENTER;
+		ivLike.setScaleType(ScaleType.CENTER);
+		ivLike.setLayoutParams(params);			
+		ivLike.setBackgroundResource(R.drawable.circle);
+		ivLike.setImageResource(R.drawable.btn_like);
+		llLikeUsers.addView(ivLike);		
 		
 		for (int i = 0; i < length; i++) {
 			ImageView ivUser = new ImageView(this);
