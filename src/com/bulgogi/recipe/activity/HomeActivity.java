@@ -14,6 +14,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ScrollViewDelegate;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -23,11 +24,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -51,7 +54,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.localytics.android.LocalyticsSession;
 
-public class HomeActivity extends SherlockActivity implements Session.StatusCallback {
+public class HomeActivity extends SherlockActivity implements Session.StatusCallback, ActionBar.OnNavigationListener {
 	private static final String TAG = HomeActivity.class.getSimpleName();
 
 	private LocalyticsSession localyticsSession;
@@ -85,6 +88,13 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		getSupportActionBar().setIcon(R.drawable.abs_icon);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+        Context context = getSupportActionBar().getThemedContext();
+        ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(context, R.array.ar_sort, R.layout.tv_sherlock_spinner_item);
+        list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+
+        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        getSupportActionBar().setListNavigationCallbacks(list, this);
+        
 		adapter = new ThumbnailAdapter(this, thumbnails);
 		gvThumbnail = (GridView) findViewById(R.id.sgv_thumbnail);
 
@@ -395,4 +405,9 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	public void onRefreshClicked(View v) {
 		requestRecipe(Constants.QUERY_COUNT, true);
 	}
+	
+    @Override
+    public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+        return true;
+    }
 }
