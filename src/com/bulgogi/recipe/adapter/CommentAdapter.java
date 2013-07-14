@@ -57,6 +57,7 @@ public class CommentAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
+		// [XXX] PullToRefresh에서 아이템이 하나도 없을 때 스크롤 시 상단 잘리는 현상 우회처리
 		if (comments.size() == 0) {
 			return 1;
 		}
