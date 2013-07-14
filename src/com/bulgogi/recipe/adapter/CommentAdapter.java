@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bulgogi.recipe.R;
+import com.bulgogi.recipe.activity.RecipeActivity;
 import com.bulgogi.recipe.http.model.Comment;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -58,7 +59,7 @@ public class CommentAdapter extends BaseAdapter {
 	@Override
 	public int getCount() {
 		// [XXX] PullToRefresh에서 아이템이 하나도 없을 때 스크롤 시 상단 잘리는 현상 우회처리
-		if (comments.size() == 0) {
+		if (comments.size() == 0 && context instanceof RecipeActivity && !((RecipeActivity)context).isLoading()) {
 			return 1;
 		}
 		
