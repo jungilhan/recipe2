@@ -37,6 +37,7 @@ public class CommentAdapter extends BaseAdapter {
 		TextView tvName;
 		TextView tvComment;
 		TextView tvTimestamp;
+		TextView tvEmpty;
 	}
 
 	public CommentAdapter(Context context, ArrayList<Comment> comments) {
@@ -56,6 +57,10 @@ public class CommentAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
+		if (comments.size() == 0) {
+			return 1;
+		}
+		
 		return comments.size();
 	}
 
@@ -82,11 +87,27 @@ public class CommentAdapter extends BaseAdapter {
 			holder.tvName = (TextView) convertView.findViewById(R.id.tv_name);
 			holder.tvComment = (TextView) convertView.findViewById(R.id.tv_comment);
 			holder.tvTimestamp = (TextView) convertView.findViewById(R.id.tv_timestamp);
+			holder.tvEmpty = (TextView) convertView.findViewById(R.id.tv_empty_comments);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
 
+		if (comments.size() == 0 && position == 0) {
+			holder.ivProfile.setVisibility(View.INVISIBLE);
+			holder.tvName.setVisibility(View.INVISIBLE);
+			holder.tvComment.setVisibility(View.INVISIBLE);
+			holder.tvTimestamp.setVisibility(View.INVISIBLE);
+			holder.tvEmpty.setVisibility(View.VISIBLE);
+			return convertView;
+		} else {
+			holder.ivProfile.setVisibility(View.VISIBLE);
+			holder.tvName.setVisibility(View.VISIBLE);
+			holder.tvComment.setVisibility(View.VISIBLE);
+			holder.tvTimestamp.setVisibility(View.VISIBLE);
+			holder.tvEmpty.setVisibility(View.GONE);
+		}
+		
 		Comment comment = comments.get(position);
 		String url = comment.thumbnail;
 		if (url.contains("?type=small")) {

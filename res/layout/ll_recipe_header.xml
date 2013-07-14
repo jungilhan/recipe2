@@ -180,28 +180,6 @@
         android:background="#fff"
         android:orientation="horizontal" >
     </LinearLayout>  
-    
-	<LinearLayout
-	    android:id="@+id/ll_empty_coments"
-	    android:layout_width="match_parent"
-	    android:layout_height="wrap_content"
-	    android:orientation="vertical"
-	    android:visibility="gone" >
-	    <View 
-	        android:layout_width="match_parent"
-	        android:layout_height="1dp"
-	        android:background="#ddd" />
-		   
-		<TextView
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:paddingTop="15dp"
-	        android:paddingBottom="15dp"	        
-	        android:gravity="center_horizontal"
-	        android:text="@string/empty_comments"
-	        android:textColor="#666"
-	        android:textSize="@dimen/h3" />
-	</LinearLayout>
 	
     <LinearLayout
         android:id="@+id/ll_loading_msg"

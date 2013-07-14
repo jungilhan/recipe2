@@ -10,8 +10,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher.Options;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -71,6 +69,9 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -83,7 +84,7 @@ import com.viewpagerindicator.CirclePageIndicator;
 public class RecipeActivity extends SherlockActivity implements OnClickListener, Session.StatusCallback {
 	private static final String TAG = RecipeActivity.class.getSimpleName();
 
-	private PullToRefreshAttacher pullToRefreshAttacher;
+	private PullToRefreshListView lvRefreshWrapper;
 	private ListView lvComments;
 	private CommentAdapter adapter;
 	private ArrayList<Comment> commentList = new ArrayList<Comment>();
@@ -252,15 +253,15 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 				} else {
 					if (etComment.getText().length() > 0) {
 						final int postId = post.id;
-						String id = facebookHelper.getId();
-						String name = facebookHelper.getName();
-						String thumbnail = FBRestApi.getProfileUrl(Long.parseLong(id));
-						String comment = etComment.getText().toString();
-
+						String id = facebookHelper.getId();						
 						if (id == null || (id != null && id.equals(""))) {
 							Toast.makeText(RecipeActivity.this, getResources().getString(R.string.comment_send_error), Toast.LENGTH_LONG).show();
 							return;
 						}
+						
+						String name = facebookHelper.getName();
+						String thumbnail = FBRestApi.getProfileUrl(Long.parseLong(id));
+						String comment = etComment.getText().toString();
 
 						HttpApi httpApi = new HttpApi();
 						RequestParams params = new RequestParams();
@@ -284,22 +285,19 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		});
 
 		adapter = new CommentAdapter(this, commentList);
-		lvComments = (ListView) findViewById(R.id.lv_comments);
+		
+		lvRefreshWrapper = (PullToRefreshListView) findViewById(R.id.lv_comments);
+		lvRefreshWrapper.setOnRefreshListener(new OnRefreshListener<ListView>() {
+		    @Override
+		    public void onRefresh(PullToRefreshBase<ListView> refreshView) {
+		    	requestComments(post.id);
+				requestLike(post.id, false);
+		    }
+		});	
+		
+		lvComments = (ListView) lvRefreshWrapper.getRefreshableView(); 
 		lvComments.addHeaderView(llHeader);
 		lvComments.setAdapter(adapter);
-
-		Options options = new Options();
-		options.refreshScrollDistance = 0.4f;
-		pullToRefreshAttacher = new PullToRefreshAttacher(this, options);
-		if (android.os.Build.VERSION.SDK_INT >= 14) {
-			pullToRefreshAttacher.setRefreshableView(lvComments, new PullToRefreshAttacher.OnRefreshListener() {
-				@Override
-				public void onRefreshStarted(View view) {
-					requestComments(post.id);
-					requestLike(post.id, false);
-				}
-			});
-		}
 		
 		llLikeUsers = (LinearLayout)findViewById(R.id.ll_like_users);
 		llLikeUsers.setOnClickListener(this);
@@ -362,19 +360,12 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	protected void onPause() {
 		super.onPause();
 
-		if (android.os.Build.VERSION.SDK_INT >= 14) {
-			pullToRefreshAttacher.setRefreshComplete();
-		}
+		lvRefreshWrapper.onRefreshComplete();
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.recipe, menu);
-
-		if (android.os.Build.VERSION.SDK_INT >= 14) {
-			MenuItem refresh = menu.findItem(R.id.action_refresh);
-			refresh.setVisible(false);
-		}
 		return true;
 	}
 
@@ -384,12 +375,6 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		case android.R.id.home:
 			finish();
 			return true;
-		case R.id.action_refresh:
-			findViewById(R.id.pb_main_loading).setVisibility(View.VISIBLE);
-
-			requestComments(postId);
-			requestLike(postId, false);
-			break;
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -536,7 +521,6 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	
 	private class CommentsLoader extends AsyncTask {
 		private TextView tvCountComment = (TextView) llHeader.findViewById(R.id.tv_count_comment);
-		private LinearLayout llEmpty = (LinearLayout) llHeader.findViewById(R.id.ll_empty_coments);
 		private LinearLayout llLoadingMsg = (LinearLayout) llHeader.findViewById(R.id.ll_loading_msg);
 		private TextView tvLoadingMsg = (TextView) llLoadingMsg.getChildAt(1);
 
@@ -562,10 +546,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		}
 
 		@Override
-		protected void onPostExecute(Object result) {
-			if (android.os.Build.VERSION.SDK_INT >= 14) {
-				pullToRefreshAttacher.setRefreshComplete();
-			}
+		protected void onPostExecute(Object result) {			
+			lvRefreshWrapper.onRefreshComplete();
 
 			isLoading = false;
 			findViewById(R.id.pb_main_loading).setVisibility(View.GONE);
@@ -580,15 +562,11 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			}
 
 			ArrayList<Comment> comments = (ArrayList<Comment>) result;
-			Log.d(TAG, comments.toString());
-
-			int length = comments.size();
-			if (length == 0) {
-				llEmpty.setVisibility(View.VISIBLE);
-			} else {
-				llEmpty.setVisibility(View.GONE);
+			if (Constants.Config.DEBUG) {
+				Log.d(TAG, comments.toString());
 			}
 
+			int length = comments.size();
 			for (int i = 0; i < length; i++) {
 				Comment comment = (Comment) comments.get(i);
 				if (!contains(comment)) {

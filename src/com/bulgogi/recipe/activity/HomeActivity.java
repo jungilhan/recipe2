@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
-import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ScrollViewDelegate;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -52,6 +50,9 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshGridView;
 import com.localytics.android.LocalyticsSession;
 
 public class HomeActivity extends SherlockActivity implements Session.StatusCallback, ActionBar.OnNavigationListener {
@@ -61,9 +62,9 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 
 	private ArrayList<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
 	private HashMap<Integer, Count> countMap = new HashMap<Integer, Count>();
+	private PullToRefreshGridView gvRefreshWrapper;
 	private GridView gvThumbnail;
 	private ThumbnailAdapter adapter;
-	private PullToRefreshAttacher pullToRefreshAttacher;
 	private FacebookHelper facebookHelper;
 	private MenuItem actionbarLogin;
 	private boolean isLoading = false;
@@ -96,23 +97,20 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
         getSupportActionBar().setListNavigationCallbacks(list, this);
         
 		adapter = new ThumbnailAdapter(this, thumbnails);
-		gvThumbnail = (GridView) findViewById(R.id.sgv_thumbnail);
+		gvRefreshWrapper = (PullToRefreshGridView) findViewById(R.id.sgv_thumbnail);
+		gvThumbnail = gvRefreshWrapper.getRefreshableView();
 
+		gvRefreshWrapper.setOnRefreshListener(new OnRefreshListener<GridView>() {
+		    @Override
+		    public void onRefresh(PullToRefreshBase<GridView> refreshView) {
+				requestCountInfo();
+				requestRecipe(Constants.QUERY_COUNT, false);
+		    }
+		});
+		
 		int columns = RecipeApplication.isTablet() == true ? Constants.GRIDVIEW_TABLET_COLUMNS : Constants.GRIDVIEW_DEFAULT_COLUMNS;
 		gvThumbnail.setNumColumns(columns);
 		gvThumbnail.setAdapter(adapter);
-
-		pullToRefreshAttacher = new PullToRefreshAttacher(this);
-		if (android.os.Build.VERSION.SDK_INT >= 14) {
-			pullToRefreshAttacher.setRefreshableView(gvThumbnail, (PullToRefreshAttacher.ViewDelegate) new ScrollViewDelegate(),
-					new PullToRefreshAttacher.OnRefreshListener() {
-				@Override
-				public void onRefreshStarted(View view) {
-					requestCountInfo();
-					requestRecipe(Constants.QUERY_COUNT, false);
-				}
-			});
-		}
 	}
 
 	@Override
@@ -151,9 +149,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		localyticsSession.upload();
 		super.onPause();
 
-		if (android.os.Build.VERSION.SDK_INT >= 14) {
-			pullToRefreshAttacher.setRefreshComplete();
-		}
+		gvRefreshWrapper.onRefreshComplete();
 	}
 
 	private void requestRecipe(int count, boolean showProgressBar) {
@@ -204,9 +200,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 
 		@Override
 		protected void onPostExecute(Object result) {
-			if (android.os.Build.VERSION.SDK_INT >= 14) {
-				pullToRefreshAttacher.setRefreshComplete();
-			}
+			gvRefreshWrapper.onRefreshComplete();
 
 			isLoading = false;
 
@@ -223,7 +217,9 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			}
 
 			Posts posts = (Posts) result;
-			// Log.d(TAG, posts.toString());
+			if (Constants.Config.DEBUG) {
+				Log.d(TAG, posts.toString());
+			}
 
 			for (int i = 0; i < posts.posts.size(); i++) {
 				Post post = posts.posts.get(i);
@@ -330,11 +326,6 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.home, menu);
 		actionbarLogin = menu.findItem(R.id.action_login);
-
-		if (android.os.Build.VERSION.SDK_INT >= 14) {
-			MenuItem refresh = menu.findItem(R.id.action_refresh);
-			refresh.setVisible(false);
-		}
 		return true;
 	}
 
@@ -354,10 +345,6 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
         	} else {
         		showLogoutDialog();
         	}
-        	break;
-        case R.id.action_refresh:
-        	requestCountInfo();
-        	requestRecipe(Constants.QUERY_COUNT, true);
         	break;
         }
         return super.onOptionsItemSelected(item);
