@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bulgogi.recipe.R;
+import com.bulgogi.recipe.http.FBRestApi;
 import com.bulgogi.recipe.http.model.Like;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -83,9 +84,8 @@ public class LikeUserAdapter  extends BaseAdapter {
 			holder.ivProfile.setVisibility(View.INVISIBLE);
 		} else {
 			holder.tvName.setText(likeUser.name);
-			holder.ivProfile.setVisibility(View.VISIBLE);			
-			String url = "http://graph.facebook.com/" + likeUser.facebookId + "/picture?type=normal";
-			imageLoader.displayImage(url, holder.ivProfile, options, new SimpleImageLoadingListener() {
+			holder.ivProfile.setVisibility(View.VISIBLE);
+			imageLoader.displayImage(FBRestApi.getProfileUrl(likeUser.facebookId), holder.ivProfile, options, new SimpleImageLoadingListener() {
 				@Override
 				public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 					Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);

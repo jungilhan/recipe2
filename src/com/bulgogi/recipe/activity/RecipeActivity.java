@@ -21,7 +21,9 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -35,6 +37,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
@@ -56,6 +59,7 @@ import com.bulgogi.recipe.adapter.RecipePagerAdapter;
 import com.bulgogi.recipe.auth.FacebookHelper;
 import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.config.Constants.Extra;
+import com.bulgogi.recipe.http.FBRestApi;
 import com.bulgogi.recipe.http.HttpApi;
 import com.bulgogi.recipe.http.NodeRestApi;
 import com.bulgogi.recipe.http.model.Comment;
@@ -102,7 +106,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 
 		Intent intent = getIntent();
 		Post post = (Post) intent.getSerializableExtra(Extra.POST);
-		setupView(post);
+		setupViews(post);
 
 		postId = post.id;
 		requestComments(post.id);
@@ -114,13 +118,13 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		}
 	}
 
-	private void setupView(final Post post) {
+	private void setupViews(final Post post) {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowHomeEnabled(false);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
 		getSupportActionBar().setTitle(post.title);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
+		
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		llHeader = (LinearLayout) inflater.inflate(R.layout.ll_recipe_header, null);
 
@@ -170,15 +174,37 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		}
 		tvDirections.setText(Html.fromHtml(direction));
 
-		ImageView ivYoutube = (ImageView) llHeader.findViewById(R.id.iv_youtube);
+		final ImageView ivYoutube = (ImageView) llHeader.findViewById(R.id.iv_youtube);
 		ivYoutube.setOnClickListener(this);
+		ivYoutube.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				Drawable drawable = ivYoutube.getDrawable();
+				if (drawable == null) {
+					return false;
+				}
+
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
+					drawable.setColorFilter(0x22000000, PorterDuff.Mode.SRC_ATOP);
+					ivYoutube.invalidate();
+					break;
+				case MotionEvent.ACTION_UP:
+				case MotionEvent.ACTION_CANCEL:
+					drawable.clearColorFilter();
+					ivYoutube.invalidate();
+					break;
+				}
+				return false;
+			}
+		});
 		String youtubeId = post.tags.get(0).youtubeId();
 		ivYoutube.setTag(youtubeId);
 		if (youtubeId.equals("null")) {
 			ivYoutube.setVisibility(View.INVISIBLE);
 		} else {
 			ivYoutube.setVisibility(View.VISIBLE);
-		}
+		}		
 
 		final EditText etComment = (EditText) findViewById(R.id.et_comment);
 
@@ -228,7 +254,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 						final int postId = post.id;
 						String id = facebookHelper.getId();
 						String name = facebookHelper.getName();
-						String thumbnail = "http://graph.facebook.com/" + id + "/picture?type=normal";
+						String thumbnail = FBRestApi.getProfileUrl(Long.parseLong(id));
 						String comment = etComment.getText().toString();
 
 						if (id == null || (id != null && id.equals(""))) {
@@ -481,7 +507,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			llLikeUsers.addView(ivUser);
 			
 			Like like = likes.get(i);	
-			imageLoader.displayImage("http://graph.facebook.com/" + like.facebookId + "/picture?type=normal", ivUser, options, new SimpleImageLoadingListener() {
+			imageLoader.displayImage(FBRestApi.getProfileUrl(like.facebookId), ivUser, options, new SimpleImageLoadingListener() {
 				@Override
 				public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 					Animation animation = AnimationUtils.loadAnimation(RecipeActivity.this, R.anim.fade_in);
