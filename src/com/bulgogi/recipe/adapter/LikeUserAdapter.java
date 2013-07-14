@@ -1,15 +1,10 @@
 package com.bulgogi.recipe.adapter;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,28 +15,26 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bulgogi.recipe.R;
-import com.bulgogi.recipe.http.model.Comment;
+import com.bulgogi.recipe.http.model.Like;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
-public class CommentAdapter extends BaseAdapter {
+public class LikeUserAdapter  extends BaseAdapter {
 	private Context context;
-	private ArrayList<Comment> comments;
+	private ArrayList<Like> likeUsers;
 	private ImageLoader imageLoader = ImageLoader.getInstance();
 	private DisplayImageOptions options;
 
 	static class ViewHolder {
 		ImageView ivProfile;
 		TextView tvName;
-		TextView tvComment;
-		TextView tvTimestamp;
 	}
 
-	public CommentAdapter(Context context, ArrayList<Comment> comments) {
+	public LikeUserAdapter(Context context, ArrayList<Like> likePeople) {
 		this.context = context;
-		this.comments = comments;
+		this.likeUsers = likePeople;
 		this.options = new DisplayImageOptions.Builder()
 			.cacheInMemory()
 			.cacheOnDisc()
@@ -56,12 +49,12 @@ public class CommentAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		return comments.size();
+		return likeUsers.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return comments.get(position);
+		return likeUsers.get(position);
 	}
 
 	@Override
@@ -75,45 +68,34 @@ public class CommentAdapter extends BaseAdapter {
 
 		if (convertView == null) {
 			LayoutInflater inflator = LayoutInflater.from(context);
-			convertView = inflator.inflate(R.layout.rl_comment, null);
+			convertView = inflator.inflate(R.layout.ll_like_user_item, null);
 
 			holder = new ViewHolder();
 			holder.ivProfile = (ImageView) convertView.findViewById(R.id.iv_profile);
 			holder.tvName = (TextView) convertView.findViewById(R.id.tv_name);
-			holder.tvComment = (TextView) convertView.findViewById(R.id.tv_comment);
-			holder.tvTimestamp = (TextView) convertView.findViewById(R.id.tv_timestamp);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
 
-		Comment comment = comments.get(position);
-		String url = comment.thumbnail;
-		if (url.contains("?type=small")) {
-			url = url.replace("?type=small", "?type=normal");
+		Like likeUser = likeUsers.get(position);
+		if (likeUser.name == null) {
+			holder.ivProfile.setVisibility(View.INVISIBLE);
+		} else {
+			holder.tvName.setText(likeUser.name);
+			holder.ivProfile.setVisibility(View.VISIBLE);			
+			String url = "http://graph.facebook.com/" + likeUser.facebookId + "/picture?type=normal";
+			imageLoader.displayImage(url, holder.ivProfile, options, new SimpleImageLoadingListener() {
+				@Override
+				public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+					Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
+					view.setAnimation(animation);
+					animation.start();
+				}
+			});
 		}
-		imageLoader.displayImage(url, holder.ivProfile, options, new SimpleImageLoadingListener() {
-			@Override
-			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
-				view.setAnimation(animation);
-				animation.start();
-			}
-		});
-
-		holder.tvName.setText(comment.name);
-		holder.tvComment.setText(comment.comment);
-
-		try {
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.KOREA);
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(formatter.parse(comment.timestamp.substring(0, 24)));
-			calendar.add(Calendar.HOUR, 9);
-			String timestamp = DateUtils.getRelativeTimeSpanString(calendar.getTimeInMillis()).toString();
-			holder.tvTimestamp.setText(timestamp);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		
 		return convertView;
 	}
+
 }

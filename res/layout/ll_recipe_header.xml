@@ -54,9 +54,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
+                android:minWidth="8dp"
                 android:textSize="@dimen/h3"
-                android:textColor="#666"
-                android:text="--"/>
+                android:textColor="#666"                
+                android:text=""/>
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -67,9 +68,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
+                android:minWidth="8dp"                
                 android:textSize="@dimen/h3"
                 android:textColor="#666"
-                android:text="--"/>
+                android:text=""/>
         </LinearLayout>
     </RelativeLayout>
     
@@ -163,6 +165,21 @@
             android:textSize="@dimen/h3"
             android:textColor="#666" />
     </RelativeLayout>  
+    
+    <View 
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ddd" />
+        
+    <LinearLayout
+        android:id="@+id/ll_like_users"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:background="#fff"
+        android:orientation="horizontal" >
+    </LinearLayout>  
     
 	<LinearLayout
 	    android:id="@+id/ll_empty_coments"

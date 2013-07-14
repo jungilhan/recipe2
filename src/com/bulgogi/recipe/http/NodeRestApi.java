@@ -50,5 +50,5 @@ public class NodeRestApi {
 		StringBuilder url = new StringBuilder(BASE_URL);
 		url.append(REQUEST_COUNT_INFO);
 		return url.toString();
-	}
+	}	
 }

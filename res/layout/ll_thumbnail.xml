@@ -8,7 +8,7 @@
 	    android:id="@+id/container"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"    
-	    android:background="@drawable/rect_shadow" >        
+	    android:background="@drawable/round_rect_thumbnail" >        
 	
 		<ImageView
 		    android:id="@+id/iv_thumbnail"
@@ -85,7 +85,7 @@
 	                android:singleLine="true"
 	                android:ellipsize="end"
 	                android:textSize="@dimen/h5"
-	                android:textColor="#999" />
+	                android:textColor="#888" />
 	        </LinearLayout>
 	    </LinearLayout>
 	    
@@ -107,7 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
                 android:textSize="@dimen/h5"
-                android:textColor="#666"
+                android:textColor="#888"
                 android:text="-"/>
             <ImageView
                 android:layout_width="12dp"
@@ -120,7 +120,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
                 android:textSize="@dimen/h5"
-                android:textColor="#666"
+                android:textColor="#888"
                 android:text="-"/>
         </LinearLayout>
 	</RelativeLayout>

@@ -8,16 +8,18 @@ import android.os.Message;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.bulgogi.recipe.R;
+import com.crashlytics.android.Crashlytics;
 
 public class SplashActivity extends SherlockActivity {
 	private final int DELAY = 2000;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Crashlytics.start(this);
 		setContentView(R.layout.ac_splash);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		
+
 		Handler handler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
@@ -27,7 +29,7 @@ public class SplashActivity extends SherlockActivity {
 				finish();
 			}
 		};
-		
+
 		handler.sendEmptyMessageDelayed(0, DELAY);
 	}
 }

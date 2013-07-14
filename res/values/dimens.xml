@@ -11,6 +11,11 @@
     <dimen name="h4">14sp</dimen>
     <dimen name="h5">12sp</dimen>
     <dimen name="h6">10sp</dimen>
+    
+    <dimen name="profile_width">40dp</dimen>
+    <dimen name="profile_height">40dp</dimen>
+    <dimen name="profile_margin">10dp</dimen>
+    <dimen name="profile_round">4dp</dimen>
 
     <integer name="short_animation_time">400</integer>
 </resources>
