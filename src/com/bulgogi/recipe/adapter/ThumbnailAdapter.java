@@ -63,6 +63,7 @@ public class ThumbnailAdapter extends BaseAdapter {
 			.cacheInMemory()
 			.cacheOnDisc()
 			.resetViewBeforeLoading()
+			.bitmapConfig(Config.RGB_565)
 			.build();
 		
 		this.optionsChef = new DisplayImageOptions.Builder()
