@@ -5,19 +5,23 @@
         AppBaseTheme from BOTH res/values/styles.xml and
         res/values-v11/styles.xml on API 14+ devices.
     -->
-    <style name="AppBaseTheme" parent="Theme.Sherlock.Light">
+    <style name="AppBaseTheme" parent="@style/Theme.Sherlock.Light">
         <!-- API 14 theme customizations can go here. -->
         <item name="android:actionBarStyle">@style/LightActionBar</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Recipe</item>
     </style>
 
-    <style name="LightActionBar" parent="Widget.Sherlock.ActionBar">
+    <style name="LightActionBar" parent="@style/Widget.Sherlock.Light.ActionBar.Solid">
         <item name="android:displayOptions">showHome</item>
         <item name="android:background">@drawable/abs_background</item>
         <item name="android:titleTextStyle">@style/Theme.Recipe.ActionBar.TitleTextStyle</item>
     </style>
     
-    <style name="Theme.Recipe.ActionBar.TitleTextStyle" parent="TextAppearance.Sherlock.Widget.ActionBar.Title">
+    <style name="Theme.Recipe.ActionBar.TitleTextStyle" parent="@style/TextAppearance.Sherlock.Widget.ActionBar.Title">
         <item name="android:textColor">#fff</item>
     </style>
-
+    
+    <style name="DropDownNav.Recipe" parent="@style/Widget.Sherlock.Light.Spinner.DropDown.ActionBar">
+        <item name="android:background">@drawable/abs_spinner_background</item>
+    </style>
 </resources>
