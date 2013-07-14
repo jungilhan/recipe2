@@ -82,10 +82,6 @@ public class LikeUserActivity extends SherlockListActivity {
 	    getListView().getAdapter().getView(position, view, getListView());
 	}
 	
-	private void requestName(long facebookId) {
-		
-	}
-	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -96,32 +92,4 @@ public class LikeUserActivity extends SherlockListActivity {
 
 		return super.onOptionsItemSelected(item);
 	}
-	
-//	private class NameLoader extends AsyncTask {
-//		@Override
-//		protected Object doInBackground(Object... params) {
-//			ObjectMapper mapper = new ObjectMapper();
-//			ArrayList<Like> likes = new ArrayList<Like>();
-//
-//			try {
-//				likes = mapper.readValue(new URL((String) params[0]), new TypeReference<List<Like>>() {
-//				});
-//			} catch (JsonGenerationException e) {
-//				e.printStackTrace();
-//			} catch (JsonMappingException e) {
-//				e.printStackTrace();
-//			} catch (UnknownHostException e) {
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//
-//			return likes;
-//		}
-//
-//		@Override
-//		protected void onPostExecute(Object result) {
-//			likeList = (ArrayList<Like>) result;
-//		}
-//	}
 }
