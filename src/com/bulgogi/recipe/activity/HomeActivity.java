@@ -12,7 +12,6 @@ import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -22,7 +21,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -89,12 +87,16 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		getSupportActionBar().setIcon(R.drawable.abs_icon);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+		
+		/**
+		 * [XXX] 정렬은 다음 업데이트 때 반영 예정
         Context context = getSupportActionBar().getThemedContext();
         ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(context, R.array.ar_sort, R.layout.tv_sherlock_spinner_item);
         list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
 
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         getSupportActionBar().setListNavigationCallbacks(list, this);
+        */
         
 		adapter = new ThumbnailAdapter(this, thumbnails);
 		gvRefreshWrapper = (PullToRefreshGridView) findViewById(R.id.sgv_thumbnail);
