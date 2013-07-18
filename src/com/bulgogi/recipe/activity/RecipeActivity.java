@@ -448,6 +448,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		int height = getResources().getDimensionPixelSize(R.dimen.profile_height);
 		int margin = getResources().getDimensionPixelSize(R.dimen.profile_margin);
 		int round = getResources().getDimensionPixelSize(R.dimen.profile_round);
+		int layoutPadding = getResources().getDimensionPixelSize(R.dimen.like_users_padding);
 		
 		ImageLoader imageLoader = ImageLoader.getInstance();
 		DisplayImageOptions options = new DisplayImageOptions.Builder()
@@ -462,7 +463,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			.build();
 
 		// [XXX] 2는 좋아요 아이콘과 +N 정보를 표시하기 위한 영역
-		int max = getResources().getDisplayMetrics().widthPixels / (width + margin) - 2;
+		int max = (getResources().getDisplayMetrics().widthPixels - (layoutPadding * 2)) / (width + margin) - 2;
 		int length = 0;
 		boolean isOverflow = likes.size() > max ? true : false;		
 		if (isOverflow) {
@@ -474,10 +475,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		ImageView ivLike = new ImageView(this);
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
 		params.gravity = Gravity.CENTER;
-		ivLike.setScaleType(ScaleType.CENTER);
 		ivLike.setLayoutParams(params);			
-		ivLike.setBackgroundResource(R.drawable.circle);
-		ivLike.setImageResource(R.drawable.btn_like);
+		ivLike.setImageResource(R.drawable.ic_like_circle);
 		llLikeUsers.addView(ivLike);		
 		
 		for (int i = 0; i < length; i++) {
