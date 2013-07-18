@@ -75,7 +75,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		facebookHelper = new FacebookHelper(this, savedInstanceState, this);
 
 		setupViews();
-		requestCountInfo();
+		requestCountInfo(false);
 		requestRecipe(Constants.QUERY_COUNT, true);
 
 		localyticsSession = new LocalyticsSession(this);
@@ -105,7 +105,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		gvRefreshWrapper.setOnRefreshListener(new OnRefreshListener<GridView>() {
 		    @Override
 		    public void onRefresh(PullToRefreshBase<GridView> refreshView) {
-				requestCountInfo();
+				requestCountInfo(false);
 				requestRecipe(Constants.QUERY_COUNT, false);
 		    }
 		});
@@ -143,6 +143,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	public void onResume() {
 		super.onResume();
 		localyticsSession.open();
+		
+		requestCountInfo(true);
 	}
 
 	@Override
@@ -165,8 +167,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		new RecipeLoader().execute(WPRestApi.getPostsUrl(count, false), showProgressBar);
 	}
 
-	private void requestCountInfo() {
-		new CountInfoLoader().execute(NodeRestApi.getCountInfoUrl());
+	private void requestCountInfo(boolean invalidate) {
+		new CountInfoLoader().execute(NodeRestApi.getCountInfoUrl(), invalidate);
 	}
 
 	private class RecipeLoader extends AsyncTask {
@@ -244,7 +246,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				}
 			});
 
-			updateCountInfo();
+			updateCountInfo(false);
 
 			adapter.notifyDataSetChanged();
 		}
@@ -272,11 +274,14 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	}
 
 	private class CountInfoLoader extends AsyncTask {
+		private boolean invalidate = false;
+		
 		@Override
 		protected Object doInBackground(Object... params) {
 			ObjectMapper mapper = new ObjectMapper();
 			ArrayList<Count> counts = null;
-
+			invalidate = (Boolean) params[1];
+					
 			try {
 				counts = mapper.readValue(new URL((String) params[0]), new TypeReference<List<Count>>() {
 				});
@@ -305,21 +310,34 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				countMap.put(count.postId, count);	
 			}
 
-			updateCountInfo();
+			updateCountInfo(invalidate);
 
-			//if (thumbnails.size() > 0) {
-				//adapter.notifyDataSetChanged();
+			// [XXX] 갱신된 영역만 처리 필요
+			//if (invalidate && thumbnails.size() > 0) {
+			//	adapter.notifyDataSetChanged();
 			//}
 		}
 	}
 
-	private void updateCountInfo() {
-		for (Thumbnail thumbnail : thumbnails) {
+	private void updateCountInfo(boolean invalidate) {
+		for (int i = 0; i < thumbnails.size(); i++) {
+			Thumbnail thumbnail = thumbnails.get(i);
 			int postId = thumbnail.getId();
 			Count count = countMap.get(postId);
 			if (count != null) {
-				thumbnail.setLikeCount(count.likes);
-				thumbnail.setCommentCount(count.comments);
+				if (thumbnail.getCommentCount() != count.comments) {
+					thumbnail.setCommentCount(count.comments);
+					if (invalidate) {
+						updateItemAtPosition(i++);
+					}
+				}
+				
+				if (thumbnail.getLikeCount() != count.likes) {
+					thumbnail.setLikeCount(count.likes);
+					if (invalidate) {
+						updateItemAtPosition(i++);
+					}
+				}
 			}
 		}
 	}
@@ -392,7 +410,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	}
 
 	public void onRefreshClicked(View v) {
-		requestCountInfo();
+		requestCountInfo(false);
 		requestRecipe(Constants.QUERY_COUNT, true);
 	}
 	
@@ -400,4 +418,10 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
     public boolean onNavigationItemSelected(int itemPosition, long itemId) {
         return true;
     }
+    
+    private void updateItemAtPosition(int position) {
+	    int visiblePosition = gvThumbnail.getFirstVisiblePosition();
+	    View view = gvThumbnail.getChildAt(position - visiblePosition);
+	    gvThumbnail.getAdapter().getView(position, view, gvThumbnail);
+	}
 }

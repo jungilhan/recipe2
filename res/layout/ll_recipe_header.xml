@@ -178,7 +178,8 @@
         android:gravity="center_vertical"
         android:padding="@dimen/like_users_padding"
         android:background="#fff"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:visibility="gone" >
     </LinearLayout>  
 	
     <LinearLayout
