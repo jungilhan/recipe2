@@ -20,6 +20,16 @@ public class FacebookHelper {
 	private Activity activity;
 	private Session.StatusCallback statusCallback;
 	private GraphUser user;
+	private OnSessionListener onSessionListener;
+	
+	public interface OnSessionListener {
+		public void onLoginComplete(String id, String name);
+		public void onLogoutComplete();
+	};
+	
+	public void setOnLoginListener(OnSessionListener onLoginListener) {
+		this.onSessionListener = onLoginListener;
+	}
 
 	public FacebookHelper(Activity activity, Bundle savedInstanceState, Session.StatusCallback statusCallback) {
 		this.activity = activity;
@@ -61,6 +71,10 @@ public class FacebookHelper {
 			PreferenceHelper.getInstance().putString(Constants.PREF_FACEBOOK_ID, null);
 
 			Toast.makeText(activity, activity.getResources().getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
+			
+			if (onSessionListener != null) {
+				onSessionListener.onLogoutComplete();
+			}
 		}
 	}
 
@@ -69,8 +83,8 @@ public class FacebookHelper {
 		return session.isOpened();
 	}
 
-	public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-		Session.getActiveSession().onActivityResult(activity, requestCode, resultCode, data);
+	public boolean onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+		return Session.getActiveSession().onActivityResult(activity, requestCode, resultCode, data);
 	}
 
 	public void saveSession(Bundle outState) {
@@ -112,8 +126,14 @@ public class FacebookHelper {
 					if (graphUser != null) {
 						user = graphUser;
 
-						PreferenceHelper.getInstance().putString(Constants.PREF_NAME, user.getName());
-						PreferenceHelper.getInstance().putString(Constants.PREF_FACEBOOK_ID, user.getId());
+						String name = user.getName();
+						String id = user.getId();
+						PreferenceHelper.getInstance().putString(Constants.PREF_NAME, name);
+						PreferenceHelper.getInstance().putString(Constants.PREF_FACEBOOK_ID, id);
+						
+						if (onSessionListener != null) {
+							onSessionListener.onLoginComplete(id, name);
+						}
 					}
 				}
 

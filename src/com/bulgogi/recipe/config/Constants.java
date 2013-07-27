@@ -1,18 +1,27 @@
 package com.bulgogi.recipe.config;
 
 public class Constants {
-	private Constants() {}
-	
+	private Constants() {
+	}
+
 	public static final String PREF_NAME = "name";
 	public static final String PREF_FACEBOOK_ID = "facebook_id";
+	public static final String PREF_SORT_TYPE = "sort_type";
+
 	public static final int QUERY_COUNT = 60;
+
 	public static final int GRIDVIEW_DEFAULT_COLUMNS = 2;
 	public static final int GRIDVIEW_TABLET_COLUMNS = 3;
-	
+
+	public static final int SORT_BY_NEWEST = 0;
+	public static final int SORT_BY_VIEW_COUNT = 1;
+	public static final int SORT_BY_LIKE_COUNT = 2;
+	public static final int SORT_BY_COMMENT_COUNT = 3;
+
 	public static class Config {
 		public static final boolean DEBUG = false;
 	}
-	
+
 	public static class Extra {
 		public static final String POST = "com.bulgogi.recipe.extra.POST";
 		public static final String LIKE_USERS = "com.bulgogi.recipe.extra.LIKE_USERS";

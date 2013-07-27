@@ -16,7 +16,7 @@
     <dimen name="profile_height">40dp</dimen>
     <dimen name="profile_margin">10dp</dimen>
     <dimen name="profile_round">4dp</dimen>
-    <dimen name="like_users_padding">10dp</dimen>    
+    <dimen name="like_users_padding">10dp</dimen>
 
     <integer name="short_animation_time">400</integer>
 </resources>
