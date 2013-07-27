@@ -4,23 +4,29 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar.LayoutParams;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -28,12 +34,17 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.internal.widget.IcsAdapterView;
+import com.actionbarsherlock.internal.widget.IcsAdapterView.OnItemSelectedListener;
+import com.actionbarsherlock.internal.widget.IcsLinearLayout;
+import com.actionbarsherlock.internal.widget.IcsSpinner;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bulgogi.recipe.R;
 import com.bulgogi.recipe.adapter.ThumbnailAdapter;
 import com.bulgogi.recipe.application.RecipeApplication;
 import com.bulgogi.recipe.auth.FacebookHelper;
+import com.bulgogi.recipe.auth.FacebookHelper.OnSessionListener;
 import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.http.NodeRestApi;
 import com.bulgogi.recipe.http.WPRestApi;
@@ -41,6 +52,9 @@ import com.bulgogi.recipe.http.model.Count;
 import com.bulgogi.recipe.http.model.Post;
 import com.bulgogi.recipe.http.model.Posts;
 import com.bulgogi.recipe.model.Thumbnail;
+import com.bulgogi.recipe.utils.KakaoLink;
+import com.bulgogi.recipe.utils.PreferenceHelper;
+import com.bulgogi.recipe.utils.Sort;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.widget.ProfilePictureView;
@@ -52,6 +66,8 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshGridView;
 import com.localytics.android.LocalyticsSession;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
 public class HomeActivity extends SherlockActivity implements Session.StatusCallback, ActionBar.OnNavigationListener {
 	private static final String TAG = HomeActivity.class.getSimpleName();
@@ -64,7 +80,9 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	private GridView gvThumbnail;
 	private ThumbnailAdapter adapter;
 	private FacebookHelper facebookHelper;
-	private MenuItem actionbarLogin;
+	private DrawerLayout drawerLayout;
+	private SherlockActionBarDrawerToggle drawerToggle;
+	private IcsSpinner spinner;
 	private boolean isLoading = false;
 
 	@Override
@@ -73,7 +91,24 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		setContentView(R.layout.ac_home);
 
 		facebookHelper = new FacebookHelper(this, savedInstanceState, this);
+		facebookHelper.setOnLoginListener(new OnSessionListener() {
+			@Override
+			public void onLoginComplete(String id, String name) {
+				ProfilePictureView ppvProfile = (ProfilePictureView) findViewById(R.id.ppv_profile);
+				ppvProfile.setProfileId(id);
+				
+				TextView tvName = (TextView) findViewById(R.id.tv_name);
+				tvName.setText(name);
+				
+				setProfileVisibility(true);
+			}
 
+			@Override
+			public void onLogoutComplete() {
+				setProfileVisibility(false);
+			}
+		});
+		
 		setupViews();
 		requestCountInfo(false);
 		requestRecipe(Constants.QUERY_COUNT, true);
@@ -84,19 +119,70 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	}
 
 	private void setupViews() {
-		getSupportActionBar().setIcon(R.drawable.abs_icon);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setIcon(R.drawable.abs_icon);
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setHomeButtonEnabled(true);
+ 
+		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		drawerLayout.setDrawerListener(new DrawerListener() {
+			@Override
+			public void onDrawerOpened(View drawerView) {
+				drawerToggle.onDrawerOpened(drawerView);
+				setProfileVisibility(facebookHelper.isLogin());
+			}
+			
+			@Override
+			public void onDrawerClosed(View drawerView) {
+				drawerToggle.onDrawerClosed(drawerView);
+			}
+			
+			@Override
+			public void onDrawerStateChanged(int state) {
+				drawerToggle.onDrawerStateChanged(state);
+			}
+			
+			@Override
+			public void onDrawerSlide(View drawerView, float offset) {
+				drawerToggle.onDrawerSlide(drawerView, offset);
+			}
+		});
 		
-		/**
-		 * [XXX] 정렬은 다음 업데이트 때 반영 예정
-        Context context = getSupportActionBar().getThemedContext();
-        ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(context, R.array.ar_sort, R.layout.tv_sherlock_spinner_item);
-        list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+		drawerToggle = new SherlockActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer_dark, R.string.drawer_open, R.string.drawer_close);
+		drawerToggle.syncState();
+		
+		Context context = actionBar.getThemedContext(); 
+		String[] items = getResources().getStringArray(R.array.ar_sort);
+		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(context, R.layout.tv_sherlock_spinner_item, items); 
+		spinnerAdapter.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item); 
 
-        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        getSupportActionBar().setListNavigationCallbacks(list, this);
-        */
+		spinner = new IcsSpinner(this, null, R.attr.actionDropDownStyle); 
+		spinner.setAdapter(spinnerAdapter);
+		spinner.setSelection(PreferenceHelper.getInstance().getInt(Constants.PREF_SORT_TYPE, 0));
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() { 
+		    @Override 
+		    public void onItemSelected(IcsAdapterView<?> parent, View view, int position, long id) {
+		    	PreferenceHelper.getInstance().putInt(Constants.PREF_SORT_TYPE, position);
+		    	sortThumbnail(thumbnails, position, true);
+		    }
+		    
+		    @Override 
+		    public void onNothingSelected(IcsAdapterView<?> parent) {
+		    	
+		    }
+		}); 
+
+		IcsLinearLayout listNavLayout = (IcsLinearLayout) getLayoutInflater().inflate(R.layout.abs__action_bar_tab_bar_view, null);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+		params.gravity = Gravity.CENTER;
+		params.rightMargin = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
+		listNavLayout.addView(spinner, params);
+		listNavLayout.setGravity(Gravity.RIGHT);
+
+		actionBar.setCustomView(listNavLayout, new ActionBar.LayoutParams(Gravity.RIGHT));
+		actionBar.setDisplayShowCustomEnabled(true);
         
 		adapter = new ThumbnailAdapter(this, thumbnails);
 		gvRefreshWrapper = (PullToRefreshGridView) findViewById(R.id.sgv_thumbnail);
@@ -113,7 +199,68 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		int columns = RecipeApplication.isTablet() == true ? Constants.GRIDVIEW_TABLET_COLUMNS : Constants.GRIDVIEW_DEFAULT_COLUMNS;
 		gvThumbnail.setNumColumns(columns);
 		gvThumbnail.setAdapter(adapter);
-	}
+
+        View llProfile = findViewById(R.id.ll_profile);
+        View llLogin = findViewById(R.id.ll_login);
+        llProfile.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showLogoutDialog();
+			}
+		});
+        
+        llLogin.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				facebookHelper.login();
+			}
+		});
+
+        if (facebookHelper.getId() != null) {
+			ProfilePictureView ppvProfile = (ProfilePictureView) findViewById(R.id.ppv_profile);
+			ppvProfile.setProfileId(facebookHelper.getId());
+		}
+
+        boolean isLogin = facebookHelper.isLogin();
+        setProfileVisibility(isLogin);
+        if (isLogin) {
+        	ProfilePictureView ppvProfile = (ProfilePictureView) findViewById(R.id.ppv_profile);
+			ppvProfile.setProfileId(facebookHelper.getId());
+			
+			TextView tvName = (TextView) findViewById(R.id.tv_name);
+			tvName.setText(facebookHelper.getName());
+        }
+        
+        View llClearCache = findViewById(R.id.ll_clear_image_cache);
+        llClearCache.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				ImageLoader.getInstance().clearMemoryCache();
+				ImageLoader.getInstance().clearDiscCache();
+			}
+		});
+        
+        View llShareViewKakaoTalk = findViewById(R.id.ll_share_via_kakaotalk);
+        llShareViewKakaoTalk.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				KakaoLink kakaoLink = KakaoLink.getLink(getApplicationContext());
+				if (!kakaoLink.isAvailableIntent())
+				  return;
+				
+				try {
+					kakaoLink.openKakaoLink(
+							HomeActivity.this,
+							"https://play.google.com/store/apps/details?id=com.bulgogi.recipe",
+							"진격의 야간매점 레시피! 해피투게더 야간매점에서 소개하는 다양한 레시피로 홈메이드 스타일 푸드를 즐겨보세요.",
+							getPackageName(),
+							getPackageManager().getPackageInfo(getPackageName(), 0).versionName, "야간매점 레시피", "UTF-8");
+				} catch (NameNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}        
 
 	@Override
 	public void onStart() {
@@ -235,18 +382,10 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				thumbnails.add(thumbnail);
 			}
 
-			Collections.sort(thumbnails, new Comparator<Thumbnail>() {
-				public int compare(Thumbnail s1, Thumbnail s2) {
-					if (s1.getId() > s2.getId())
-						return -1;
-					else if (s1.getId() < s2.getId())
-						return 1;
-					else
-						return 0;
-				}
-			});
-
 			updateCountInfo(false);
+			
+			int type = spinner.getSelectedItemPosition();
+			sortThumbnail(thumbnails, type, true);
 
 			adapter.notifyDataSetChanged();
 		}
@@ -345,31 +484,17 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.home, menu);
-		actionbarLogin = menu.findItem(R.id.action_login);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.action_settings:
-			if (facebookHelper.isLogin()) {
-				actionbarLogin.setTitle(R.string.action_logout);
-			} else {
-				actionbarLogin.setTitle(R.string.action_login);
-			}
-        	break;
-        case R.id.action_login:
-        	if (!facebookHelper.isLogin()) {
-        		facebookHelper.login();
-        	} else {
-        		showLogoutDialog();
-        	}
-        	break;
-        }
+		if (drawerToggle.onOptionsItemSelected(item)) {
+			return true;
+		}
         return super.onOptionsItemSelected(item);
     }
-
+	
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void showLogoutDialog() {
 		View innerView = getLayoutInflater().inflate(R.layout.rl_logout, null);
@@ -406,7 +531,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	public void call(Session session, SessionState state, Exception exception) {
 		if (session != null && session.isOpened()) {
 			facebookHelper.makeMeRequest(session);
-		}
+		}			
 	}
 
 	public void onRefreshClicked(View v) {
@@ -424,4 +549,43 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	    View view = gvThumbnail.getChildAt(position - visiblePosition);
 	    gvThumbnail.getAdapter().getView(position, view, gvThumbnail);
 	}
+    
+    private void sortThumbnail(ArrayList<Thumbnail> thumbnails, int type, boolean notify) {
+    	if (thumbnails.size() <= 0) {
+    		return;
+    	}
+
+    	Sort.byNewest(thumbnails);
+    	
+    	switch (type) {
+    	case Constants.SORT_BY_NEWEST:
+    		break;
+    	case Constants.SORT_BY_VIEW_COUNT:
+    		Sort.byViewCount(thumbnails, countMap);
+    		break;
+    	case Constants.SORT_BY_LIKE_COUNT:
+    		Sort.byLikeCount(thumbnails, countMap);
+    		break;
+    	case Constants.SORT_BY_COMMENT_COUNT:
+    		Sort.byCommentCount(thumbnails, countMap);
+    		break;
+    	}
+    	
+    	if (notify) {
+    		adapter.notifyDataSetChanged();
+    	}
+    }
+    
+    private void setProfileVisibility(boolean visibility) {
+    	View llProfile = findViewById(R.id.ll_profile);
+        View llLogin = findViewById(R.id.ll_login);
+        
+    	if (visibility) {
+        	llProfile.setVisibility(View.VISIBLE);
+        	llLogin.setVisibility(View.GONE);
+		} else {
+			llProfile.setVisibility(View.GONE);
+			llLogin.setVisibility(View.VISIBLE);
+		}    	
+    }
 }
