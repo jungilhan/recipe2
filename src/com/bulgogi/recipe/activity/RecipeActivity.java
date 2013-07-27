@@ -12,6 +12,7 @@ import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -388,9 +389,15 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.iv_youtube:
-			StringBuilder sb = new StringBuilder("vnd.youtube:");
-			sb.append(v.getTag());
-			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sb.toString())));
+			try {
+				StringBuilder sb = new StringBuilder("vnd.youtube:");
+				sb.append(v.getTag());
+				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sb.toString())));
+			} catch (ActivityNotFoundException e) {
+				StringBuilder sb = new StringBuilder("http://www.youtube.com/watch?v=");
+				sb.append(v.getTag());
+				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sb.toString())));
+			}
 			break;
 		case R.id.ll_like_users_wrapper:
 			Intent intent = new Intent(this, LikeUserActivity.class);
