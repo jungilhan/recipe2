@@ -92,8 +92,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	private LinearLayout llHeader;
 	private FacebookHelper facebookHelper;
 	private InputMethodManager inputMethodManager;
-	private LinearLayout ivLikeWrapper;
-	private LinearLayout llLikeUsers;
+	private LinearLayout lvLikeButtonWrapper;
+	private LinearLayout llLikeUsersWrapper;
 	private boolean isLoading = false;
 	private int postId;
 
@@ -209,14 +209,14 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 
 		final EditText etComment = (EditText) findViewById(R.id.et_comment);
 
-		ivLikeWrapper = (LinearLayout) findViewById(R.id.ll_like_wrapper);
-		ivLikeWrapper.setOnClickListener(new OnClickListener() {
+		lvLikeButtonWrapper = (LinearLayout) findViewById(R.id.ll_like_wrapper);
+		lvLikeButtonWrapper.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (!facebookHelper.isLogin()) {
 					showLoginDialog();
 				} else {
-					ivLikeWrapper.setVisibility(View.GONE);
+					lvLikeButtonWrapper.setVisibility(View.GONE);
 
 					final int postId = post.id;
 					String id = facebookHelper.getId();
@@ -299,8 +299,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		lvComments.addHeaderView(llHeader);
 		lvComments.setAdapter(adapter);
 		
-		llLikeUsers = (LinearLayout)findViewById(R.id.ll_like_users);
-		llLikeUsers.setOnClickListener(this);
+		llLikeUsersWrapper = (LinearLayout)findViewById(R.id.ll_like_users_wrapper);
+		llLikeUsersWrapper.setOnClickListener(this);
 	}
 
 	private void requestComments(int postId) {
@@ -392,7 +392,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			sb.append(v.getTag());
 			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sb.toString())));
 			break;
-		case R.id.ll_like_users:
+		case R.id.ll_like_users_wrapper:
 			Intent intent = new Intent(this, LikeUserActivity.class);
 			intent.putExtra(Extra.LIKE_USERS, (Serializable) likeList);
 			startActivity(intent);
@@ -437,12 +437,17 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 
 	private void showLikeUser(ArrayList<Like> likes) {
 		if (likes.size() == 0) {
-			llLikeUsers.setVisibility(View.GONE);
+			llLikeUsersWrapper.setVisibility(View.GONE);
 			return;
 		}
 		
+		llLikeUsersWrapper.setVisibility(View.VISIBLE);
+		
+		TextView tvLikeUsers = (TextView) findViewById(R.id.tv_like_users);
+		tvLikeUsers.setText(likes.size() + "명이 좋아해요");
+		
+		LinearLayout llLikeUsers = (LinearLayout) findViewById(R.id.ll_like_users);
 		llLikeUsers.removeAllViews();
-		llLikeUsers.setVisibility(View.VISIBLE);
 		
 		int width = getResources().getDimensionPixelSize(R.dimen.profile_width);
 		int height = getResources().getDimensionPixelSize(R.dimen.profile_height);
@@ -462,8 +467,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			.displayer(new RoundedBitmapDisplayer(round))
 			.build();
 
-		// [XXX] 2는 좋아요 아이콘과 +N 정보를 표시하기 위한 영역
-		int max = (getResources().getDisplayMetrics().widthPixels - (layoutPadding * 2)) / (width + margin) - 2;
+		// [XXX] -1는 +N 정보를 표시하기 위한 영역
+		int max = (getResources().getDisplayMetrics().widthPixels - (layoutPadding * 2)) / (width + margin) - 1;
 		int length = 0;
 		boolean isOverflow = likes.size() > max ? true : false;		
 		if (isOverflow) {
@@ -472,16 +477,9 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			length = likes.size();
 		}
 		
-		ImageView ivLike = new ImageView(this);
-		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
-		params.gravity = Gravity.CENTER;
-		ivLike.setLayoutParams(params);			
-		ivLike.setImageResource(R.drawable.ic_like_circle);
-		llLikeUsers.addView(ivLike);		
-		
 		for (int i = 0; i < length; i++) {
 			ImageView ivUser = new ImageView(this);
-			params = new LinearLayout.LayoutParams(width, height);
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
 			params.leftMargin = margin;
 			
 			if (i == length - 1) {
@@ -505,7 +503,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		
 		if (isOverflow) {
 			TextView tvMore = new TextView(this);
-			params = new LinearLayout.LayoutParams(width, height);
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
 			tvMore.setLayoutParams(params);			
 			tvMore.setTextColor(Color.WHITE);
 			tvMore.setGravity(Gravity.CENTER);
@@ -644,7 +642,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 
 		@Override
 		protected void onPostExecute(Object result) {
-			ivLikeWrapper.setVisibility(View.VISIBLE);
+			lvLikeButtonWrapper.setVisibility(View.VISIBLE);
 			pbLike.setVisibility(View.GONE);
 
 			likeList = (ArrayList<Like>) result;
@@ -663,7 +661,7 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 			tvLike.setText(Integer.toString(likeList.size()));
 			showLikeUser(likeList);
 
-			ImageView ivLike = ((ImageView) ivLikeWrapper.getChildAt(0));
+			ImageView ivLike = ((ImageView) lvLikeButtonWrapper.getChildAt(0));
 			if (likeList.size() > 0 && facebookHelper.getId() != null) {
 				if (isAlreadyLike(Long.parseLong(facebookHelper.getId()))) {
 					if (showToast) {

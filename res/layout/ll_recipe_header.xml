@@ -103,7 +103,7 @@
 		        android:layout_height="wrap_content"
 		        android:layout_marginLeft="10dp"
 		        android:layout_gravity="center_vertical"
-		        android:textSize="@dimen/h2"
+		        android:textSize="@dimen/h3"
 		        android:textColor="#e44f37"
 		        android:textStyle="bold"
 		        android:text="@string/ingredients" />
@@ -148,7 +148,7 @@
 	            android:layout_height="wrap_content"
 	            android:layout_marginLeft="10dp"
 	            android:layout_gravity="center_vertical"
-	            android:textSize="@dimen/h2"
+	            android:textSize="@dimen/h3"
 	            android:textColor="#e44f37"
 	            android:textStyle="bold"
 	            android:text="@string/directions" />
@@ -172,14 +172,46 @@
         android:background="#ddd" />
         
     <LinearLayout
-        android:id="@+id/ll_like_users"
+        android:id="@+id/ll_like_users_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:padding="@dimen/like_users_padding"
-        android:background="#fff"
-        android:orientation="horizontal"
-        android:visibility="gone" >
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:clickable="true"
+		android:background="@drawable/nv_drawer_selector" >
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="horizontal"
+        	android:duplicateParentState="true">
+			<ImageView
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+				android:src="@drawable/btn_unlike" />
+		    <TextView
+		        android:id="@+id/tv_like_users"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginLeft="10dp"
+		        android:layout_gravity="center_vertical"
+		        android:textSize="@dimen/h3"
+		        android:textColor="#e44f37"
+		        android:textStyle="bold"
+		        android:text="명이 좋아해요" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/ll_like_users"
+            android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:layout_marginTop="14dp"
+        	android:layout_marginBottom="7dp"
+        	android:orientation="horizontal"
+        	android:duplicateParentState="true">
+		</LinearLayout>	
     </LinearLayout>  
 	
     <LinearLayout
