@@ -457,9 +457,9 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		
 		ImageLoader imageLoader = ImageLoader.getInstance();
 		DisplayImageOptions options = new DisplayImageOptions.Builder()
-			.cacheInMemory()
-			.cacheOnDisc()
-			.resetViewBeforeLoading()
+			.cacheInMemory(true)
+			.cacheOnDisc(true)
+			.resetViewBeforeLoading(true)
 			.showImageForEmptyUri(R.drawable.ic_blank_profile)
 			.showImageOnFail(R.drawable.ic_blank_profile)
 			.showStubImage(R.drawable.ic_blank_profile)

@@ -18,7 +18,9 @@ public class RecipeApplication extends Application {
 		isTablet = getResources().getBoolean(R.bool.is_tablet);
 
 		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext())
-			.memoryCacheSize((int) (Runtime.getRuntime().maxMemory() / 8)).build();
+			.memoryCacheSizePercentage(40)
+			.build();
+		
 		ImageLoader.getInstance().init(config);
 
 		PreferenceHelper.getInstance().init(PreferenceManager.getDefaultSharedPreferences(this));

@@ -45,9 +45,9 @@ public class CommentAdapter extends BaseAdapter {
 		this.context = context;
 		this.comments = comments;
 		this.options = new DisplayImageOptions.Builder()
-			.cacheInMemory()
-			.cacheOnDisc()
-			.resetViewBeforeLoading()
+			.cacheInMemory(true)
+			.cacheOnDisc(true)
+			.resetViewBeforeLoading(true)
 			.showImageForEmptyUri(R.drawable.ic_blank_profile)
 			.showImageOnFail(R.drawable.ic_blank_profile)
 			.showStubImage(R.drawable.ic_blank_profile)

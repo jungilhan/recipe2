@@ -4,6 +4,7 @@
     
     <dimen name="sgv_vertical_padding">4dp</dimen>
     <dimen name="sgv_item_padding">4dp</dimen>
+    <dimen name="thumbnail_round">6dp</dimen>
     
     <dimen name="h1">17sp</dimen>
     <dimen name="h2">16sp</dimen>
@@ -18,5 +19,7 @@
     <dimen name="profile_round">4dp</dimen>
     <dimen name="like_users_padding">10dp</dimen>
 
+    <dimen name="navigation_drawer_width">260dp</dimen>
+    
     <integer name="short_animation_time">400</integer>
 </resources>

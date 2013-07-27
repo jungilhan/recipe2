@@ -1,4 +1,5 @@
 <resources>
     <dimen name="activity_horizontal_margin">0dp</dimen>
     <dimen name="navigation_drawer_width">260dp</dimen>
+    <dimen name="thumbnail_round">6dp</dimen>
 </resources>

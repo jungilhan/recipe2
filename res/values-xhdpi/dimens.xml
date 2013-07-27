@@ -1,3 +1,4 @@
 <resources>
     <dimen name="navigation_drawer_width">300dp</dimen>
+    <dimen name="thumbnail_round">8dp</dimen>
 </resources>

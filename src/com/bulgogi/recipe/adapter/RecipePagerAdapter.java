@@ -32,9 +32,9 @@ public class RecipePagerAdapter extends PagerAdapter {
 		this.inflater = LayoutInflater.from(context);
 		this.images = images;
 		this.options = new DisplayImageOptions.Builder()
-		.cacheInMemory()
-		.cacheOnDisc()
-		.resetViewBeforeLoading()
+		.cacheInMemory(true)
+		.cacheOnDisc(true)
+		.resetViewBeforeLoading(true)
 		.build();
 	}
 	

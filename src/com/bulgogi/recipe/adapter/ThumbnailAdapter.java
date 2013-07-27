@@ -29,8 +29,10 @@ import com.bulgogi.recipe.application.RecipeApplication;
 import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.config.Constants.Extra;
 import com.bulgogi.recipe.model.Thumbnail;
+import com.bulgogi.recipe.utils.TopRoundedBitmapDisplayer;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
@@ -60,16 +62,18 @@ public class ThumbnailAdapter extends BaseAdapter {
 		this.inflator = LayoutInflater.from(context);
 		this.thumbnails = thumbnails;
 		this.optionsThumbnail = new DisplayImageOptions.Builder()
-			.cacheInMemory()
-			.cacheOnDisc()
-			.resetViewBeforeLoading()
+			.cacheInMemory(true)
+			.cacheOnDisc(true)
+			.resetViewBeforeLoading(true)
 			.bitmapConfig(Config.RGB_565)
+			.displayer(new TopRoundedBitmapDisplayer((int) context.getResources().getDimension(R.dimen.thumbnail_round)))
+			.imageScaleType(ImageScaleType.IN_SAMPLE_INT)
 			.build();
 		
 		this.optionsChef = new DisplayImageOptions.Builder()
-			.cacheInMemory()
-			.cacheOnDisc()
-			.resetViewBeforeLoading()
+			.cacheInMemory(true)
+			.cacheOnDisc(true)
+			.resetViewBeforeLoading(true)
 			.showImageForEmptyUri(R.drawable.ic_blank_profile)
 			.showImageOnFail(R.drawable.ic_blank_profile)
 			.showStubImage(R.drawable.ic_blank_profile)
