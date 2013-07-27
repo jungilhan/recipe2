@@ -31,6 +31,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
@@ -177,7 +178,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		IcsLinearLayout listNavLayout = (IcsLinearLayout) getLayoutInflater().inflate(R.layout.abs__action_bar_tab_bar_view, null);
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
 		params.gravity = Gravity.CENTER;
-		params.rightMargin = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
+		params.rightMargin = 6;
 		listNavLayout.addView(spinner, params);
 		listNavLayout.setGravity(Gravity.RIGHT);
 
@@ -237,6 +238,8 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			public void onClick(View view) {
 				ImageLoader.getInstance().clearMemoryCache();
 				ImageLoader.getInstance().clearDiscCache();
+				
+				Toast.makeText(HomeActivity.this, "캐시가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
 			}
 		});
         

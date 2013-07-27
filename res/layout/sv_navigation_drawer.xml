@@ -61,7 +61,7 @@
             android:id="@+id/ll_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:padding="10dp"
             android:orientation="horizontal"
             android:clickable="true"
             android:background="@drawable/nv_drawer_selector" >
@@ -148,7 +148,7 @@
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center_vertical"
-	                android:text="이미지 캐시 지우기"
+	                android:text="캐시 지우기"
 	                android:textColor="#666"
 	                android:textSize="@dimen/h1" />
 	            

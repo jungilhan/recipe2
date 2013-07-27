@@ -63,7 +63,7 @@
 	
     <include
         android:id="@+id/lv_drawer"
-		android:layout_width="300dp"
+		android:layout_width="@dimen/navigation_drawer_width"
     	android:layout_height="match_parent" 
         android:layout_gravity="left"
         layout="@layout/sv_navigation_drawer"/>
