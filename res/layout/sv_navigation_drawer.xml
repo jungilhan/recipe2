@@ -95,9 +95,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:text="페이스북 담벼락에 글을 남기지 않아요."
+                    android:text="허락없이 타임라인에 글을 남기지 않아요."
                     android:textColor="#999"
-                    android:textSize="@dimen/h4"
+                    android:textSize="@dimen/h5"
                     android:duplicateParentState="true" />
             </LinearLayout>
         </LinearLayout>
@@ -156,7 +156,7 @@
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center_vertical"
-	                android:text="프로필 이미지가 제대로 나오지 않는다면 캐시를 지워보세요."
+	                android:text="프로필 이미지가 업데이트 되지 않는다면 캐시를 지워보세요."
 	                android:textColor="#999"
 	                android:textSize="@dimen/h5"
 	                android:duplicateParentState="true" />
