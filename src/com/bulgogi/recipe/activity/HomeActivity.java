@@ -132,7 +132,17 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			@Override
 			public void onDrawerOpened(View drawerView) {
 				drawerToggle.onDrawerOpened(drawerView);
-				setProfileVisibility(facebookHelper.isLogin());
+				
+				boolean isLogin = facebookHelper.isLogin();
+				if (isLogin) {
+					ProfilePictureView ppvProfile = (ProfilePictureView) findViewById(R.id.ppv_profile);
+					ppvProfile.setProfileId(facebookHelper.getId());
+					
+					TextView tvName = (TextView) findViewById(R.id.tv_name);
+					tvName.setText(facebookHelper.getName());
+				}
+				
+				setProfileVisibility(isLogin);
 			}
 			
 			@Override
