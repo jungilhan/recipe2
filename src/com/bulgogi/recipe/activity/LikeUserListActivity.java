@@ -20,6 +20,8 @@ import com.bulgogi.recipe.http.FBRestApi;
 import com.bulgogi.recipe.http.model.Like;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.nbpcorp.mobilead.sdk.MobileAdListener;
+import com.nbpcorp.mobilead.sdk.MobileAdView;
 
 public class LikeUserListActivity extends SherlockListActivity {
 	public void onCreate(Bundle savedInstanceState) {
@@ -74,6 +76,20 @@ public class LikeUserListActivity extends SherlockListActivity {
 			    }
 			});
 		}
+		
+		final MobileAdView adView = (MobileAdView) findViewById(R.id.adview);
+		adView.setListener(new MobileAdListener() {
+			@Override
+			public void onReceive(int error) {
+				if (error == -1 || error == 3 || error == 4 || error == 5 || error == 101
+						|| error == 102 || error == 103 || error == 105 || error == 106) {
+					adView.setVisibility(View.GONE);
+				} else {
+					adView.setVisibility(View.VISIBLE);
+				}
+			}
+		});
+		adView.start();
 	}
 	
 	private void updateItemAtPosition(int position) {

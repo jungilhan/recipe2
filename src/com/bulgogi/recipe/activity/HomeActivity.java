@@ -67,6 +67,8 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshGridView;
 import com.localytics.android.LocalyticsSession;
+import com.nbpcorp.mobilead.sdk.MobileAdListener;
+import com.nbpcorp.mobilead.sdk.MobileAdView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
@@ -84,6 +86,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 	private DrawerLayout drawerLayout;
 	private SherlockActionBarDrawerToggle drawerToggle;
 	private IcsSpinner spinner;
+	private MobileAdView adView;
 	private boolean isLoading = false;
 
 	@Override
@@ -273,6 +276,20 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 				}
 			}
 		});
+        
+		adView = (MobileAdView) findViewById(R.id.adview);
+		adView.setListener(new MobileAdListener() {
+			@Override
+			public void onReceive(int error) {
+				if (error == -1 || error == 3 || error == 4 || error == 5 || error == 101
+						|| error == 102 || error == 103 || error == 105 || error == 106) {
+					adView.setVisibility(View.GONE);
+				} else {
+					adView.setVisibility(View.VISIBLE);
+				}
+			}
+		});
+		adView.start();
 	}        
 
 	@Override
@@ -314,6 +331,14 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		super.onPause();
 
 		gvRefreshWrapper.onRefreshComplete();
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		
+		adView.destroy();
+		adView = null;
 	}
 
 	private void requestRecipe(int count, boolean showProgressBar) {

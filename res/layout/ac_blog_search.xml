@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#fff"
@@ -8,6 +8,16 @@
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
     
-</FrameLayout>
+	<com.nbpcorp.mobilead.sdk.MobileAdView
+        xmlns:mobilead="http://schemas.android.com/apk/res/com.bulgogi.recipe"
+        android:id="@+id/adview"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        mobilead:channel_id="mandroid_247f68d92bdc41cb8704414c48b18e5f"
+        mobilead:test="false" />
+    
+</LinearLayout>

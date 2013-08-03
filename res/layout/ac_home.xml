@@ -12,17 +12,26 @@
 	    xmlns:tools="http://schemas.android.com/tools"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"    
-	    android:background="#e8e8e8"    
-	    tools:context=".HomeActivity" >
-	
+	    android:background="#e8e8e8" >
+
 	    <com.handmark.pulltorefresh.library.PullToRefreshGridView
 	        android:id="@+id/sgv_thumbnail"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"        
+	        android:layout_above="@+id/adview"
 	        android:paddingTop="@dimen/sgv_vertical_padding"
 	        android:paddingBottom="@dimen/sgv_vertical_padding"
 	        android:fadeScrollbars="true" />
-	
+	    
+	    <com.nbpcorp.mobilead.sdk.MobileAdView
+            xmlns:mobilead="http://schemas.android.com/apk/res/com.bulgogi.recipe"
+            android:id="@+id/adview"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            mobilead:channel_id="mandroid_247f68d92bdc41cb8704414c48b18e5f"
+            mobilead:test="false" />
+
 	    <ProgressBar 
 	        android:id="@+id/pb_main_loading"
 	        android:layout_width="wrap_content"
@@ -67,5 +76,4 @@
     	android:layout_height="match_parent" 
         android:layout_gravity="left"
         layout="@layout/sv_navigation_drawer"/>
-
 </android.support.v4.widget.DrawerLayout>

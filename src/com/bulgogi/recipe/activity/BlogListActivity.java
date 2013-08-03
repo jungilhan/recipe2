@@ -28,6 +28,8 @@ import com.bulgogi.recipe.http.model.Blog;
 import com.bulgogi.recipe.http.model.Blog.Item;
 import com.bulgogi.recipe.parser.BlogSearchXmlParser;
 import com.bulgogi.recipe.parser.BlogSearchXmlParser.OnParserListener;
+import com.nbpcorp.mobilead.sdk.MobileAdListener;
+import com.nbpcorp.mobilead.sdk.MobileAdView;
 
 public class BlogListActivity extends SherlockListActivity {
 	private ArrayList<Item> items = new ArrayList<Item>();
@@ -86,6 +88,20 @@ public class BlogListActivity extends SherlockListActivity {
 			@Override
 			public void onScrollStateChanged(AbsListView arg0, int arg1) {}
 		});
+		
+		final MobileAdView adView = (MobileAdView) findViewById(R.id.adview);
+		adView.setListener(new MobileAdListener() {
+			@Override
+			public void onReceive(int error) {
+				if (error == -1 || error == 3 || error == 4 || error == 5 || error == 101
+						|| error == 102 || error == 103 || error == 105 || error == 106) {
+					adView.setVisibility(View.GONE);
+				} else {
+					adView.setVisibility(View.VISIBLE);
+				}
+			}
+		});
+		adView.start();
 	}
 
 	private void request(final String query, int display, int start) {
