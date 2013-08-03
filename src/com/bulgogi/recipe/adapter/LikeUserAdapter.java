@@ -22,7 +22,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
-public class LikeUserAdapter  extends BaseAdapter {
+public class LikeUserAdapter extends BaseAdapter {
 	private Context context;
 	private ArrayList<Like> likeUsers;
 	private ImageLoader imageLoader = ImageLoader.getInstance();
@@ -97,5 +97,4 @@ public class LikeUserAdapter  extends BaseAdapter {
 		
 		return convertView;
 	}
-
 }

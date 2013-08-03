@@ -21,7 +21,7 @@ import com.bulgogi.recipe.http.model.Like;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
-public class LikeUserActivity extends SherlockListActivity {
+public class LikeUserListActivity extends SherlockListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.ac_like_user);

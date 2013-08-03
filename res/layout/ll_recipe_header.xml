@@ -170,6 +170,53 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#ddd" />
+    
+    <LinearLayout
+        android:id="@+id/ll_blog_search_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/nv_drawer_selector"
+        android:clickable="true"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:padding="10dp" >
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="horizontal"
+        	android:duplicateParentState="true">
+			<ImageView
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+				android:src="@drawable/btn_unlike" />
+		    <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginLeft="10dp"
+		        android:layout_gravity="center_vertical"
+		        android:textSize="@dimen/h3"
+		        android:textColor="#e44f37"
+		        android:textStyle="bold"
+		        android:text="블로그" />
+        </LinearLayout>
+        
+	    <TextView
+	        android:id="@+id/tv_blog_search"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="7dp"
+	        android:layout_marginLeft="10dp"
+	        android:layout_gravity="center_vertical"
+	        android:textSize="@dimen/h3"
+	        android:textColor="#666"
+	        android:text="블로그를 검색 중입니다." />        
+    </LinearLayout>
+    
+	<View 
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ddd" />
         
     <LinearLayout
         android:id="@+id/ll_like_users_wrapper"

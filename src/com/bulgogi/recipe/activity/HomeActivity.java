@@ -112,7 +112,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		
 		setupViews();
 		requestCountInfo(false);
-		requestRecipe(Constants.QUERY_COUNT, true);
+		requestRecipe(Constants.WP_RECIPE_QUERY_COUNT, true);
 
 		localyticsSession = new LocalyticsSession(this);
 		localyticsSession.open();
@@ -203,7 +203,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 		    @Override
 		    public void onRefresh(PullToRefreshBase<GridView> refreshView) {
 				requestCountInfo(false);
-				requestRecipe(Constants.QUERY_COUNT, false);
+				requestRecipe(Constants.WP_RECIPE_QUERY_COUNT, false);
 		    }
 		});
 		
@@ -549,7 +549,7 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 
 	public void onRefreshClicked(View v) {
 		requestCountInfo(false);
-		requestRecipe(Constants.QUERY_COUNT, true);
+		requestRecipe(Constants.WP_RECIPE_QUERY_COUNT, true);
 	}
 	
     @Override

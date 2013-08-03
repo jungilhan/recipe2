@@ -2,13 +2,17 @@ package com.bulgogi.recipe.activity;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -60,10 +64,14 @@ import com.bulgogi.recipe.config.Constants;
 import com.bulgogi.recipe.config.Constants.Extra;
 import com.bulgogi.recipe.http.FBRestApi;
 import com.bulgogi.recipe.http.HttpApi;
+import com.bulgogi.recipe.http.NaverRestApi;
 import com.bulgogi.recipe.http.NodeRestApi;
+import com.bulgogi.recipe.http.model.Blog;
 import com.bulgogi.recipe.http.model.Comment;
 import com.bulgogi.recipe.http.model.Like;
 import com.bulgogi.recipe.http.model.Post;
+import com.bulgogi.recipe.parser.BlogSearchXmlParser;
+import com.bulgogi.recipe.parser.BlogSearchXmlParser.OnParserListener;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -95,8 +103,10 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 	private InputMethodManager inputMethodManager;
 	private LinearLayout lvLikeButtonWrapper;
 	private LinearLayout llLikeUsersWrapper;
+	TextView tvBlogSearch;
 	private boolean isLoading = false;
-	private int postId;
+	private Post post;
+	private Blog blog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -107,16 +117,22 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
 		Intent intent = getIntent();
-		Post post = (Post) intent.getSerializableExtra(Extra.POST);
+		post = (Post) intent.getSerializableExtra(Extra.POST);
 		setupViews(post);
 
-		postId = post.id;
 		requestComments(post.id);
 		requestLike(post.id, false);
-		postPageView(postId);
+		postPageView(post.id);
+		try {
+			requestBlogSearch(post.title, post.tags.get(0).chef(), Constants.NAVER_BLOG_QUERY_COUNT, 1);
+		} catch (XmlPullParserException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		if (Constants.Config.DEBUG) {
-			Toast.makeText(this, "Post Id: " + postId, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Post Id: " + post.id, Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -300,7 +316,11 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		lvComments.addHeaderView(llHeader);
 		lvComments.setAdapter(adapter);
 		
-		llLikeUsersWrapper = (LinearLayout)findViewById(R.id.ll_like_users_wrapper);
+		LinearLayout llBlogSearchWrapper = (LinearLayout) findViewById(R.id.ll_blog_search_wrapper);
+		llBlogSearchWrapper.setOnClickListener(this);
+		tvBlogSearch = (TextView) findViewById(R.id.tv_blog_search);
+		
+		llLikeUsersWrapper = (LinearLayout) findViewById(R.id.ll_like_users_wrapper);
 		llLikeUsersWrapper.setOnClickListener(this);
 	}
 
@@ -316,6 +336,24 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 
 	private void requestLike(int postId, boolean showToast) {
 		new LikeLoader().execute(NodeRestApi.getLikeUsersUrl(postId), showToast);
+	}
+	
+	private void requestBlogSearch(String title, String chef, int display, int start) throws XmlPullParserException, IOException {
+		final String query = URLEncoder.encode(title + " " + chef + " 야간매점 레시피", "UTF-8");
+		
+		BlogSearchXmlParser parser = new BlogSearchXmlParser();
+		parser.setOnParserListener(new OnParserListener() {
+			@Override
+			public void onComplete(Blog b) {
+				if (b != null && b.total != null) {
+					blog = b;
+					blog.query = query;
+					tvBlogSearch.setText(blog.total + "개의 블로그 글이 검색되었습니다.");
+				}
+			}
+		});
+		
+		parser.read(NaverRestApi.getBlogSearchUrl(query, display, start));
 	}
 
 	private void postPageView(int postId) {
@@ -387,6 +425,8 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 
 	@Override
 	public void onClick(View v) {
+		Intent intent;
+		
 		switch (v.getId()) {
 		case R.id.iv_youtube:
 			try {
@@ -399,8 +439,18 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(sb.toString())));
 			}
 			break;
+		case R.id.ll_blog_search_wrapper:
+			if (blog != null) {
+				intent = new Intent(this, BlogListActivity.class);
+				intent.putExtra(Extra.BLOG_SEARCH_RESULT, blog);
+				intent.putExtra(Extra.BLOG_SEARCH_RESULT_TITLE, "\"" + post.title + "\"" + getResources().getString(R.string.blog_search_title));
+				startActivity(intent);
+			} else {
+				Toast.makeText(this, "블로그 검색 결과를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show();
+			}
+			break;
 		case R.id.ll_like_users_wrapper:
-			Intent intent = new Intent(this, LikeUserActivity.class);
+			intent = new Intent(this, LikeUserListActivity.class);
 			intent.putExtra(Extra.LIKE_USERS, (Serializable) likeList);
 			startActivity(intent);
 			break;
