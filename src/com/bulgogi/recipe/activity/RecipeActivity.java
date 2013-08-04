@@ -348,7 +348,9 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 				if (b != null && b.total != null) {
 					blog = b;
 					blog.query = query;
-					tvBlogSearch.setText(blog.total + "개의 블로그 글이 검색되었습니다.");
+					tvBlogSearch.setText(Html.fromHtml("<b>\"" + blog.total + "\"</b>" + "개의 블로그 글이 검색되었습니다."));
+				} else {
+					tvBlogSearch.setText("블로그 검색 결과를 불러오지 못했습니다.");
 				}
 			}
 		});

@@ -457,7 +457,9 @@ public class HomeActivity extends SherlockActivity implements Session.StatusCall
 			}
 
 			ArrayList<Count> counts = (ArrayList<Count>) result;
-			Log.d(TAG, counts.toString());
+			if (Constants.Config.DEBUG) {
+				Log.d(TAG, counts.toString());
+			}
 			for (Count count : counts) { 
 				countMap.put(count.postId, count);	
 			}
