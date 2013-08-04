@@ -83,6 +83,8 @@ import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.nbpcorp.mobilead.sdk.MobileAdListener;
+import com.nbpcorp.mobilead.sdk.MobileAdView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
@@ -321,6 +323,20 @@ public class RecipeActivity extends SherlockActivity implements OnClickListener,
 		
 		llLikeUsersWrapper = (LinearLayout) findViewById(R.id.ll_like_users_wrapper);
 		llLikeUsersWrapper.setOnClickListener(this);
+		
+		final MobileAdView adView = (MobileAdView) findViewById(R.id.adview);
+		adView.setListener(new MobileAdListener() {
+			@Override
+			public void onReceive(int error) {
+				if (error == -1 || error == 3 || error == 4 || error == 5 || error == 101
+						|| error == 102 || error == 103 || error == 105 || error == 106) {
+					adView.setVisibility(View.GONE);
+				} else {
+					adView.setVisibility(View.VISIBLE);
+				}
+			}
+		});
+		adView.start();
 	}
 
 	private void requestComments(int postId) {

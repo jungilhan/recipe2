@@ -261,6 +261,15 @@
 		</LinearLayout>	
     </LinearLayout>  
 	
+	<com.nbpcorp.mobilead.sdk.MobileAdView
+        xmlns:mobilead="http://schemas.android.com/apk/res/com.bulgogi.recipe"
+        android:id="@+id/adview"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        mobilead:channel_id="mandroid_247f68d92bdc41cb8704414c48b18e5f"
+        mobilead:test="false" />
+    	
     <LinearLayout
         android:id="@+id/ll_loading_msg"
         android:layout_width="match_parent"
