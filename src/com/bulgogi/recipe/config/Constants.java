@@ -9,7 +9,7 @@ public class Constants {
 	public static final String PREF_SORT_TYPE = "sort_type";
 
 	public static final int WP_RECIPE_QUERY_COUNT = 60;
-	public static final int NAVER_BLOG_QUERY_COUNT = 20;
+	public static final int NAVER_BLOG_QUERY_COUNT = 30;
 
 	public static final int GRIDVIEW_DEFAULT_COLUMNS = 2;
 	public static final int GRIDVIEW_TABLET_COLUMNS = 3;
