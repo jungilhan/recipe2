@@ -9,6 +9,8 @@
         <item name="android:actionBarStyle">@style/LightActionBar</item>
         <item name="actionDropDownStyle">@style/DropDownNav.Recipe</item>
         <item name="android:actionDropDownStyle">@style/DropDownNav.Recipe</item>
+        <item name="homeAsUpIndicator">@drawable/ic_prev</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_prev</item>
     </style>
 
     <style name="LightActionBar" parent="@style/Widget.Sherlock.ActionBar">
