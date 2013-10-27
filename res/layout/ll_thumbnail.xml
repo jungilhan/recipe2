@@ -44,16 +44,6 @@
 	        android:textSize="@dimen/h4"
 	        android:background="#e44f37" />
 	    
-	    <ImageView
-            android:id="@+id/iv_chef"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentLeft="true"
-            android:layout_above="@+id/divider"
-            android:layout_margin="6dp"
-            android:scaleType="centerCrop"
-            android:src="@null" />
-	               
 		<View
 		    android:id="@+id/divider"
 	    	android:layout_width="match_parent"

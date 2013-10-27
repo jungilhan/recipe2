@@ -42,7 +42,6 @@ public class ThumbnailAdapter extends BaseAdapter {
 	private ArrayList<Thumbnail> thumbnails;
 	private ImageLoader imageLoader = ImageLoader.getInstance();
 	private DisplayImageOptions optionsThumbnail;
-	private DisplayImageOptions optionsChef;
 	private Rect imageBounds = new Rect();
 	
 	static class ViewHolder {
@@ -50,7 +49,6 @@ public class ThumbnailAdapter extends BaseAdapter {
 		ImageView ivThumbnail;
 		TextView tvEpisode;
 		TextView tvChef;
-		ImageView ivChef;
 		TextView tvFood;
 		TextView tvLikeCount;
 		TextView tvCommentCount;
@@ -68,17 +66,6 @@ public class ThumbnailAdapter extends BaseAdapter {
 			.bitmapConfig(Config.RGB_565)
 			.displayer(new TopRoundedBitmapDisplayer((int) context.getResources().getDimension(R.dimen.thumbnail_round)))
 			.imageScaleType(ImageScaleType.IN_SAMPLE_INT)
-			.build();
-		
-		this.optionsChef = new DisplayImageOptions.Builder()
-			.cacheInMemory(true)
-			.cacheOnDisc(true)
-			.resetViewBeforeLoading(true)
-			.showImageForEmptyUri(R.drawable.ic_blank_profile)
-			.showImageOnFail(R.drawable.ic_blank_profile)
-			.showStubImage(R.drawable.ic_blank_profile)
-			.bitmapConfig(Config.RGB_565)
-			.displayer(new RoundedBitmapDisplayer(context.getResources().getDimensionPixelSize(R.dimen.profile_round)))
 			.build();
 				
 		int columns = RecipeApplication.isTablet() == true ? Constants.GRIDVIEW_TABLET_COLUMNS : Constants.GRIDVIEW_DEFAULT_COLUMNS;
@@ -121,7 +108,6 @@ public class ThumbnailAdapter extends BaseAdapter {
 			holder.ivThumbnail = (ImageView) convertView.findViewById(R.id.iv_thumbnail);
 			holder.tvEpisode = (TextView) convertView.findViewById(R.id.tv_episode);
 			holder.tvChef = (TextView) convertView.findViewById(R.id.tv_chef);
-			holder.ivChef = (ImageView) convertView.findViewById(R.id.iv_chef);
 			holder.tvFood = (TextView) convertView.findViewById(R.id.tv_food);
 			holder.tvLikeCount = (TextView) convertView.findViewById(R.id.tv_count_like);
 			holder.tvCommentCount = (TextView) convertView.findViewById(R.id.tv_count_comment);
@@ -179,15 +165,6 @@ public class ThumbnailAdapter extends BaseAdapter {
 			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 				holder.pbLoading.setVisibility(View.GONE);
 
-				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
-				view.setAnimation(animation);
-				animation.start();
-			}
-		});
-
-		imageLoader.displayImage(thumbnail.getChefImageUri(), holder.ivChef, optionsChef, new SimpleImageLoadingListener() {
-			@Override
-			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 				Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
 				view.setAnimation(animation);
 				animation.start();
